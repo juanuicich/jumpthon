@@ -1,24 +1,76 @@
 import { logger, task } from "@trigger.dev/sdk/v3";
-import { batch } from "googleapis/build/src/apis/batch";
-import { createOAuth2Client, fetchGmailEmail, fetchGmailInbox } from "~/lib/gmail";
-import { getAccountById, getEmailsByAcccount } from "~/server/db/queries";
+import { classifyEmail } from "~/lib/gemini";
+import { fetchGmailEmail, fetchGmailInbox, getAuthenticatedClient } from "~/lib/gmail";
+import { getEmailsByAcccount, saveEmail } from "~/server/db/queries";
+import { parseEmailSender } from "~/lib/utils"
 
 // Get a single email from a user's Gmail inbox and process it
 export const getEmailTask = task({
   id: "get-email",
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
+  queue: {
+    concurrencyLimit: 1,
+  },
+  retry: {
+    maxAttempts: 1
+  },
   run: async (payload: { accountId: string, gmailId: string }, { ctx }) => {
     logger.log("Getting email for account", payload);
 
     try {
-      // Get the account from DB using the account ID
-      const account = await getAccountById(payload.accountId);
-
       // Fetch email from Gmail using the account's access token
-      const auth = createOAuth2Client(account.access_token, account.refresh_token);
-      const email = await fetchGmailEmail(auth, payload.gmailId);
+      const { authClient, user } = await getAuthenticatedClient(payload.accountId);
 
-      return email;
+      logger.log("Authenticated client", user);
+
+      const email = await fetchGmailEmail(authClient, payload.gmailId);
+
+      logger.log("Got email", email);
+
+      let emailBody: string;
+      if (email.payload?.mimeType == "text/plain" || email.payload?.mimeType == "text/html") {
+        emailBody = email.payload?.body ? Buffer.from(email.payload?.body?.data, 'base64').toString('utf-8') : "";
+      } else if (email.payload?.mimeType.startsWith("multipart/")) {
+        emailBody = email.payload?.parts?.map(part => {
+          if (part.mimeType == "text/plain" || part.mimeType == "text/html") {
+            return Buffer.from(part.body?.data, 'base64').toString('utf-8');
+          } else {
+            return "";
+          }
+        }
+        ).join("\n");
+      }
+
+      logger.log("Decoded body", emailBody);
+
+      const summarized = await classifyEmail({
+        name: user.name,
+        email: user.email
+      }, {
+        subject: email.payload?.headers?.find(header => header.name === "Subject")?.value || "",
+        body: emailBody
+      });
+
+      const sender = parseEmailSender(email.payload?.headers?.find(header => header.name === "From")?.value || "");
+
+      const dbEmail = {
+        subject: summarized.subject,
+        preview: summarized.summary,
+        read: false,
+        starred: false,
+        gmailId: email.id,
+        sender: sender.name,
+        from: sender.email,
+        ownedById: payload.accountId,
+        unsubLink: summarized.unsub_link,
+        unread: email.payload?.labelIds?.includes("UNREAD"),
+      };
+
+      logger.log("Saving email", dbEmail);
+
+      await saveEmail(dbEmail);
+
+      return summarized;
     } catch (error) {
       logger.error("Error getting Gmail emails", { error });
       throw error;
@@ -30,39 +82,36 @@ export const getEmailTask = task({
 export const getAllGmailEmailsTask = task({
   id: "get-all-gmail-emails",
   maxDuration: 300,
+  retry: {
+    maxAttempts: 1
+  },
   run: async (payload: { accountId: string }, { ctx }) => {
     logger.log("Getting emails for account", { accountId: payload.accountId });
 
     try {
-      // Get the account from DB using the account ID
-      const account = await getAccountById(payload.accountId);
-
-      if (!account) {
-        throw new Error(`Account with ID ${payload.accountId} not found`);
-      }
-
-      if (!account.access_token) {
-        throw new Error(`No access token found for account ${payload.accountId}`);
-      }
-
       // Fetch emails from Gmail using the account's access token
-      const auth = createOAuth2Client(account.access_token, account.refresh_token);
-      const emails = await fetchGmailInbox(auth);
+      const { authClient } = await getAuthenticatedClient(payload.accountId);
+
+      logger.log("Authenticated client", authClient);
+      const emails = await fetchGmailInbox(authClient);
 
       // Check which emails aren't in the DB
       // Get user's emails from the DB to check which ones we already have
-      const userEmails = await getEmailsByAcccount(account.id);
+      const userEmails = await getEmailsByAcccount(payload.accountId);
       const existingGmailIds = new Set(userEmails.map(email => email.gmailId));
+      logger.log("Existing Gmail IDs", existingGmailIds);
 
       // Filter out emails that already exist in our database
       const newEmails = emails.filter(email => !existingGmailIds.has(email.id)).map(email => ({
-        accountId: account.id,
-        gmailId: email.id
+        payload: {
+          accountId: payload.accountId,
+          gmailId: email.id
+        }
       }));
 
-      logger.log("Found new emails", { count: newEmails.length });
+      logger.log("Batching emails", newEmails);
 
-      const batchHandle = await getEmailTask.batchTrigger(newEmails);
+      const batchHandle = await getEmailTask.batchTrigger(newEmails)
       // Enqueue tasks to fetch each individual email
 
       logger.log("Successfully batched tasks", { batchId: batchHandle.batchId });

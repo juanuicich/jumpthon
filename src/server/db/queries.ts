@@ -59,8 +59,28 @@ export async function getUserEmailsWithFilters({
 
 export async function getAccountById(id: string) {
   const account = await db.query.accounts.findFirst({
-    where: eq(accounts.id, id)
+    where: eq(accounts.id, id),
+    with: {
+      user: true,
+    }
   });
 
   return account;
+}
+
+export async function saveEmail(emailData: Omit<typeof emails.$inferInsert, "id" | "createdAt" | "updatedAt">) {
+  const result = await db.insert(emails)
+    .values(emailData)
+    .returning();
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function updateAccountAccessToken(accountId: string, accessToken: string) {
+  const result = await db.update(accounts)
+    .set({ access_token: accessToken })
+    .where(eq(accounts.id, accountId))
+    .returning({ updatedId: accounts.id });
+
+  return result.length > 0 ? result[0] : null;
 }
