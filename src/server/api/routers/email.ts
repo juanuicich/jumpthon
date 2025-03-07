@@ -5,9 +5,9 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { posts } from "~/server/db/schema";
+import { emails } from "~/server/db/schema";
 
-export const postRouter = createTRPCRouter({
+export const emailRouter = createTRPCRouter({
   hello: publicProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input }) => {
@@ -17,20 +17,20 @@ export const postRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
+    .input(z.object({ subject: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(posts).values({
-        name: input.name,
-        createdById: ctx.session.user.id,
+      await ctx.db.insert(emails).values({
+        subject: input.subject,
+        ownedById: ctx.session.user.id,
       });
     }),
 
   getLatest: protectedProcedure.query(async ({ ctx }) => {
-    const post = await ctx.db.query.posts.findFirst({
-      orderBy: (posts, { desc }) => [desc(posts.createdAt)],
+    const email = await ctx.db.query.emails.findFirst({
+      orderBy: (emails, { desc }) => [desc(emails.createdAt)],
     });
 
-    return post ?? null;
+    return email ?? null;
   }),
 
   getSecretMessage: protectedProcedure.query(() => {
