@@ -6,7 +6,7 @@ Check LICENSE file.
 ## TODO
 
 - [ ] clear DB schema
-- [ ] auth with Google
+- [x] auth with Google
 - [ ] get access to email account
 - [ ] workflow to add additional Gmail accounts
 - [ ] show list of categories
