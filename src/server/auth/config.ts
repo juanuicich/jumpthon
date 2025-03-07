@@ -40,7 +40,15 @@ export const authConfig = {
   providers: [
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          // response_type: "code",
+          scope: "openid email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify"
+        }
+      }
     })
   ],
   adapter: DrizzleAdapter(db, {
@@ -50,6 +58,12 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
+    async signIn({ account, profile }) {
+      if (account?.provider === "google" && profile?.email_verified) {
+        return true
+      }
+      return false // Do different verification for other providers that don't have `email_verified`
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {
