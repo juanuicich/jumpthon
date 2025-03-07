@@ -31,7 +31,7 @@ export const emails = createTable(
     categories: jsonb("categories"),
     ownedById: uuid("owned_by_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => accounts.id),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
