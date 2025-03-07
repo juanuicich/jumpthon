@@ -40,10 +40,9 @@ export const emails = createTable(
     ),
   },
   (email) => ([
-    primaryKey({ columns: [email.id] }),
-    index("owned_by_idx").on(email.ownedById),
-    index("created_at_idx").on(email.createdAt),
-    index("categories_idx").on(email.categories),
+    index("email_owned_by_idx").on(email.ownedById),
+    index("email_created_at_idx").on(email.createdAt),
+    index("email_categories_idx").on(email.categories),
   ])
 );
 export const categories = createTable(
@@ -64,9 +63,8 @@ export const categories = createTable(
     ),
   },
   (category) => ([
-    primaryKey({ columns: [category.id] }),
-    index("owned_by_idx").on(category.ownedById),
-    index("name_idx").on(category.name),
+    index("category_owned_by_idx").on(category.ownedById),
+    index("category_name_idx").on(category.name),
   ])
 );
 
@@ -81,10 +79,7 @@ export const users = createTable(
       withTimezone: true,
     }).default(sql`CURRENT_TIMESTAMP`),
     image: varchar("image", { length: 255 }),
-  },
-  (user) => ([
-    primaryKey({ columns: [user.id] }),
-  ])
+  }
 );
 
 export const usersRelations = relations(users, ({ many }) => ({
