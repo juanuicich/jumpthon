@@ -11,14 +11,33 @@ export async function getUserEmails() {
     throw new Error("User not authenticated");
   }
 
-  const userEmails = await getEmailsByAcccount(session.user.id);
+  const userAccounts = await getUserAccounts()
+  const accountIds = userAccounts.map(account => account.id);
+  const userEmails = await getEmailsByAcccount(accountIds);
 
   return userEmails;
 }
 
-export async function getEmailsByAcccount(accountId: string) {
+export async function getUserAccounts() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("User not authenticated");
+  }
+
+  const userAccounts = await db.query.accounts.findMany({
+    where: eq(accounts.userId, session.user.id),
+    orderBy: (accounts, { asc }) => [asc(accounts.provider)],
+  });
+
+  return userAccounts;
+}
+
+export async function getEmailsByAcccount(accountIds: string[]) {
   const userEmails = await db.query.emails.findMany({
-    where: eq(emails.ownedById, accountId),
+    where: accountIds.length === 1
+      ? eq(emails.ownedById, accountIds[0])
+      : sql`${emails.ownedById} IN ${accountIds}`,
     orderBy: (emails, { desc }) => [desc(emails.createdAt)],
   });
 

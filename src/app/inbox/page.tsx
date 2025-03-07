@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
@@ -9,6 +8,8 @@ import { Checkbox } from "~/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip"
 import { Filter, Inbox, Laptop, Plane, PiggyBank, Briefcase, Archive, Trash2, MailOpen } from "lucide-react"
+import { useEffect, useState } from "react";
+import { api } from "~/trpc/react";
 
 // Add this constant for category icons
 const categoryIcons = {
@@ -18,98 +19,84 @@ const categoryIcons = {
   work: Briefcase,
 }
 
-// Sample email data
-const emails = [
-  {
-    id: "1",
-    sender: "John Doe",
-    email: "john.doe@example.com",
-    subject: "Weekly Team Meeting",
-    preview:
-      "Hi team, Just a reminder that we have our weekly team meeting tomorrow at 10 AM. Please prepare your updates and be ready to discuss the project timeline.",
-    date: "10:30 AM",
-    read: false,
-    category: "work",
+// Import necessary hooks and functions
+
+// Email interface based on the DB schema
+interface Email {
+  id: string;
+  sender: string;
+  from: string;
+  subject: string;
+  preview: string;
+  read: boolean;
+  starred: boolean;
+  gmailId: string;
+  categories: Record<string, boolean>;
+  createdAt: Date;
+  updatedAt: Date | null;
+}
+
+// Helper function to format date for display
+function formatEmailDate(date: Date): string {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date >= today) {
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  } else if (date >= yesterday) {
+    return 'Yesterday';
+  } else {
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+}
+
+// Custom hook to fetch emails with optional filters
+function useEmails(filters?: { starred?: boolean; read?: boolean; categoryId?: string }) {
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const emailsQuery = api.email.getAll.useQuery();
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (emailsQuery.isSuccess) {
+      setEmails(emailsQuery.data);
+      setIsLoading(false);
+    } else if (emailsQuery.isError) {
+      console.error("Error fetching emails:", emailsQuery.error);
+      setError("Failed to load emails");
+      setIsLoading(false);
+    }
+  }, [emailsQuery.isSuccess, emailsQuery.isError, emailsQuery.data, emailsQuery.error, filters?.starred, filters?.read, filters?.categoryId]);
+
+  // Transform DB emails to the format expected by the UI
+  const formattedEmails = emails.map(email => ({
+    id: email.id,
+    sender: email.sender || "Unknown sender",
+    email: email.from || "",
+    subject: email.subject || "No subject",
+    preview: email.preview || "",
+    date: email.createdAt ? formatEmailDate(new Date(email.createdAt)) : "",
+    read: email.read,
+    category: Object.keys(email.categories || {}).find(key => email.categories?.[key]) || "work",
     avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: "2",
-    sender: "Marketing Team",
-    email: "marketing@company.com",
-    subject: "New Campaign Launch",
-    preview:
-      "We're excited to announce the launch of our new marketing campaign! Please review the attached materials and provide feedback by EOD.",
-    date: "Yesterday",
-    read: true,
-    category: "work",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: "3",
-    sender: "Sarah Johnson",
-    email: "sarah.j@example.com",
-    subject: "Project Deadline Update",
-    preview:
-      "Hello, I wanted to inform everyone that the deadline for the current project phase has been extended by one week. This should give us enough time to address the feedback.",
-    date: "Yesterday",
-    read: true,
-    category: "work",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: "4",
-    sender: "AI Newsletter",
-    email: "newsletter@ai-weekly.com",
-    subject: "This Week in AI:",
-    preview:
-      "The latest developments in artificial intelligence include breakthroughs in natural language processing and computer vision. Researchers have developed a new model that can understand context better than previous versions.",
-    date: "Jul 12",
-    read: false,
-    category: "ai",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: "5",
-    sender: "Travel Deals",
-    email: "deals@travel.com",
-    subject: "Summer Vacation Specials",
-    preview:
-      "Check out our exclusive summer deals to popular destinations! Book by the end of the month to get 30% off on select packages. Limited availability.",
-    date: "Jul 10",
-    read: true,
-    category: "travel",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: "6",
-    sender: "Financial Advisor",
-    email: "advisor@finance.com",
-    subject: "Your Monthly Investment Report",
-    preview:
-      "Here's a summary of your portfolio performance for the past month. Overall, your investments have grown by 3.2% despite market volatility. We recommend reviewing your allocation strategy.",
-    date: "Jul 8",
-    read: true,
-    category: "finance",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: "7",
-    sender: "AI Research Group",
-    email: "research@ai-lab.org",
-    subject: "Invitation to AI Conference",
-    preview:
-      "We're pleased to invite you to our annual AI conference taking place next month. The event will feature keynote speakers from leading tech companies and research institutions.",
-    date: "Jul 5",
-    read: false,
-    category: "ai",
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-]
+  }));
+
+  return { emails: formattedEmails, isLoading, error };
+}
 
 export default function EmailInbox() {
-  const [emailList, setEmailList] = useState(emails)
+  // Use the custom hook to fetch emails
+  const { emails: emailList, isLoading, error } = useEmails();
   const [activeCategory, setActiveCategory] = useState("all")
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
+
+  // Show loading state or error if needed
+  if (isLoading) return <div className="flex justify-center p-4">Loading emails...</div>;
+  if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   const unreadCount = emailList.filter((email) => !email.read).length
   const aiCount = emailList.filter((email) => email.category === "ai").length
