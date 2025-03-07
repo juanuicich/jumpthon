@@ -5,9 +5,9 @@ Check LICENSE file.
 
 ## TODO
 
-- [ ] clear DB schema
+- [x] clear DB schema
 - [x] auth with Google
-- [ ] get access to email account
+- [x] get access to email account
 - [ ] workflow to add additional Gmail accounts
 - [ ] show list of categories
 - [ ] add category with name and description
@@ -30,3 +30,8 @@ bonus:
 - [ ] keyboard navigation
 - [ ] read threads in-app
 - [ ] star threads
+
+## dev notes
+
+Gmail URLs can be rebuilt with this schema:
+`https://mail.google.com/mail?authuser={email_address}#all/{email_id}`
