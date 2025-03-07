@@ -120,7 +120,7 @@ export default function EmailInbox() {
     activeCategory === "all" ? emailList : emailList.filter((email) => email.category === activeCategory)
 
   const toggleEmailSelection = (id: string) => {
-    setSelectedEmails(prev => 
+    setSelectedEmails(prev =>
       prev.includes(id) ? prev.filter(emailId => emailId !== id) : [...prev, id]
     )
   }
@@ -129,7 +129,7 @@ export default function EmailInbox() {
     let updatedEmails = [...emailList]
     switch (action) {
       case 'read':
-        updatedEmails = updatedEmails.map(email => 
+        updatedEmails = updatedEmails.map(email =>
           selectedEmails.includes(email.id) ? { ...email, read: true } : email
         )
         break
@@ -233,7 +233,7 @@ export default function EmailInbox() {
                     <Select defaultValue="newest">
                       <SelectTrigger className="w-[150px]">
                         <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="newest">Newest first</SelectItem>
                         <SelectItem value="oldest">Oldest first</SelectItem>
@@ -265,7 +265,8 @@ export default function EmailInbox() {
             </div>
           </main>
         </div>
-      </TooltipProvider>
+      </div>
+    </TooltipProvider>
   )
 }
 
