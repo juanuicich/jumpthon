@@ -8,7 +8,10 @@ import { TRPCReactProvider } from "~/trpc/react";
 export const metadata: Metadata = {
   title: "Jumpthon project",
   description: "For Jumpapp hackathon",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    { rel: "icon", url: "/favicon.ico" },
+    { rel: "icon", url: "/favicon.svg", type: "image/svg+xml" },
+  ],
 };
 
 export default function RootLayout({
