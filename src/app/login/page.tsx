@@ -29,6 +29,11 @@ export default function LoginScreen() {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            prompt: "consent",
+            access_type: "offline",
+            scope: "openid email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify"
+          }
         },
       });
     } catch (error) {
