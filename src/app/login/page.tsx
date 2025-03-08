@@ -2,11 +2,25 @@
 
 import { Dog } from "lucide-react"
 import { Button } from "~/components/ui/button"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createClient } from "~/lib/supabase/client"
+import { redirect } from 'next/navigation';
+
 export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
+
+  // Redirect to inbox if user is already logged in
+  useEffect(() => {
+    async function checkAuth() {
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        redirect('/inbox');
+      }
+    }
+
+    checkAuth();
+  }, [supabase.auth]);
 
   const handleLogin = async () => {
     setIsLoading(true)
