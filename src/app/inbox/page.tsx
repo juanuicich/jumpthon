@@ -141,8 +141,8 @@ export default function EmailInbox() {
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-48 border-r p-3 hidden md:block h-screen">
+      <div className="flex flex-1 overflow-hidden max-w-7xl mx-auto">
+        <aside className="w-48 p-3 hidden md:block h-screen">
           <div className="flex items-center gap-2 mb-4 px-2">
             <Dog className="h-5 w-5 stroke-amber-600" />
             <h1 className="text-lg font-bold">Chompymail</h1>
@@ -176,8 +176,8 @@ export default function EmailInbox() {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-auto">
-          <div className="p-3 border-b flex items-center justify-between">
+        <main className="flex-1 overflow-auto border-l border-r">
+          <div className="sticky top-0 z-10 p-3 border-b backdrop-blur-md bg-white/90 dark:bg-black/50 flex justify-between w-full">
             <div className="flex items-center gap-2 h-12">
               <Checkbox
                 checked={selectedEmails.length === filteredEmails.length}
@@ -223,7 +223,7 @@ export default function EmailInbox() {
                 </>
               )}
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground pr-4 my-auto">
               {selectedEmails.length > 0
                 ? `${selectedEmails.length} selected`
                 : `${filteredEmails.length} messages`}
@@ -242,6 +242,8 @@ export default function EmailInbox() {
             ))}
           </div>
         </main>
+
+        <aside className="w-32 h-screen"></aside>
       </div>
     </div>
   )
@@ -258,7 +260,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: { email: Email; 
 
   return (
     <Card
-      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${email.read ? 'bg-accent/20' : ''
+      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${!email.read ? 'bg-accent/20' : ''
         } ${isSelected ? 'bg-primary/10' : ''}`}
     >
       <div className="flex items-start gap-3">
@@ -275,8 +277,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: { email: Email; 
             />
           ) : (
             <Avatar className="h-9 w-9 shrink-0">
-              {/* <AvatarImage src={email.avatar} alt={email.sender} /> */}
-              <AvatarFallback>{email.sender}</AvatarFallback>
+              <AvatarFallback>{email.sender ? email.sender.substring(0, 1).toUpperCase() : ""}</AvatarFallback>
             </Avatar>
           )}
         </div>
