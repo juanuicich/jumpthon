@@ -81,7 +81,7 @@ export default function EmailInbox() {
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">
       <div className="flex flex-1 overflow-hidden max-w-7xl mx-auto">
-        <aside className="w-48 p-3 hidden md:block h-screen">
+        <aside className="w-56 p-3 hidden md:block h-screen">
           <div className="flex items-center gap-2 mb-4 px-2">
             <Dog className="h-5 w-5 stroke-amber-600" />
             <h1 className="text-lg font-bold">Chompymail</h1>
@@ -106,12 +106,26 @@ export default function EmailInbox() {
                 onClick={() => setActiveCategory(category.id)}
               >
                 <DynamicIcon name={(category.icon || "email") as any} className={`mr-2 h-4 w-4 stroke-slate-800`} />
-                {category.name}
+                <span className='max-w-32 truncate'>{category.name}</span>
                 <Badge className="ml-auto" variant="secondary">
                   {category?.email[0].count as any}
                 </Badge>
               </Button>
             ))}
+            <Button
+              variant={activeCategory === "none" ? "secondary" : "ghost"}
+              className="w-full justify-start cursor-pointer"
+              onClick={() => setActiveCategory("none")}
+            >
+              <Inbox className="mr-2 h-4 w-4" />
+              <span className='max-w-32 truncate'>Uncategorized</span>
+            </Button>
+            <div className="mt-4 w-full px-2 text-left">
+              <Button variant="outline" size="sm" onClick={() => handleBatchAction('read')} className="cursor-pointer">
+                <DynamicIcon name="plus" className="h-4 w-4 mr-2" />
+                Add
+              </Button>
+            </div>
           </div>
         </aside>
 
