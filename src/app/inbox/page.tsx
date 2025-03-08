@@ -315,7 +315,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) 
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5">
-            <div className="truncate max-w-[180px] sm:max-w-xs flex items-center mr-2">
+            <div className="font-semibold text-base truncate max-w-[180px] sm:max-w-xs flex items-center mr-2">
               {email.sender}
               {emailCategories.map(category => (
                 <TooltipProvider key={category.id}>
