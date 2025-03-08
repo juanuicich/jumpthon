@@ -14,6 +14,7 @@ export const getEmailTask = task({
   retry: {
     maxAttempts: 1
   },
+  machine: "small-2x",
   run: async (payload: { accountId: string, gmailId: string }, { ctx }) => {
     logger.log("Getting email for account", payload);
 
@@ -31,8 +32,6 @@ export const getEmailTask = task({
 
       const categories = await getUserCategories(user.id);
 
-      logger.log("Got email", { email });
-
       let emailBody = ""; // Default to empty string
       if (email.payload?.mimeType == "text/plain" || email.payload?.mimeType == "text/html") {
         emailBody = email.payload?.body?.data ? Buffer.from(email.payload.body.data, 'base64').toString('utf-8') : "";
@@ -46,17 +45,13 @@ export const getEmailTask = task({
         }).join("\n") || "";
       }
 
-      logger.log("Decoded body", { content: emailBody });
-
       const summarized = await classifyEmail({
         name: user.name || "",
         email: user.email || ""
       }, {
         subject: email.payload?.headers?.find(header => header.name === "Subject")?.value || "",
         body: emailBody
-      }, categories);
-
-      logger.log("LLM response", { summarized });
+      }, categories);;
 
       const categoryId = categories.find(category => category.name == summarized.category)?.id || null;
       const sender = parseEmailSender(email.payload?.headers?.find(header => header.name === "From")?.value || "");
@@ -77,8 +72,6 @@ export const getEmailTask = task({
         to: email.payload?.headers?.find(header => header.name === "Delivered-To")?.value || "",
         content: emailBody,
       };
-
-      logger.log("Saving email", dbEmail);
 
       await upsertEmails([dbEmail]);
 
