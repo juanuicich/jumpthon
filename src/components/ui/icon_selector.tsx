@@ -8,6 +8,9 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover"
 import * as LucideIcons from "lucide-react"
 import { cn } from "~/lib/utils"
+import { DynamicIcon } from "lucide-react/dynamic"
+import { Icon } from "~/components/ui/icon"
+import { iconNames } from "lucide-react/dynamic"
 
 interface IconSelectorProps {
   selectedIcon: string
@@ -19,15 +22,10 @@ export function IconSelector({ selectedIcon, onSelectIcon }: IconSelectorProps) 
   const [searchQuery, setSearchQuery] = useState("")
   const triggerRef = useRef<HTMLButtonElement>(null)
 
-  // Get all icon names from Lucide
-  const iconNames = Object.keys(LucideIcons).filter(
-    (name) => typeof LucideIcons[name as keyof typeof LucideIcons] === "function" && name !== "createLucideIcon",
-  )
-
-  console.log(iconNames);
-
   // Filter icons based on search query
-  const filteredIcons = iconNames.filter((name) => name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredIcons = iconNames.filter((name) => name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 30);
+
+  const sanitizedIcon = iconNames.find((name) => name === selectedIcon) || "dog";
 
   // Get the selected icon component
   const SelectedIcon = (LucideIcons[selectedIcon as keyof typeof LucideIcons] as React.ElementType) || LucideIcons.Dog
@@ -36,7 +34,7 @@ export function IconSelector({ selectedIcon, onSelectIcon }: IconSelectorProps) 
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button ref={triggerRef} variant="outline" size="icon" className="h-10 w-10" aria-label="Select icon">
-          <SelectedIcon className="h-5 w-5" />
+          <Icon name={selectedIcon} className="h-5 w-5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0" align="start" side="bottom" sideOffset={5} alignOffset={-10} avoidCollisions>
@@ -47,7 +45,6 @@ export function IconSelector({ selectedIcon, onSelectIcon }: IconSelectorProps) 
             <CommandGroup>
               <div className="grid grid-cols-6 gap-1 p-2">
                 {filteredIcons.map((name) => {
-                  const Icon = LucideIcons[name as keyof typeof LucideIcons] as React.ElementType
                   return (
                     <CommandItem
                       key={name}
@@ -61,7 +58,7 @@ export function IconSelector({ selectedIcon, onSelectIcon }: IconSelectorProps) 
                         selectedIcon === name && "bg-primary/10",
                       )}
                     >
-                      <Icon className="h-5 w-5" />
+                      <DynamicIcon name={name} className="h-5 w-5" />
                       <span className="sr-only">{name}</span>
                     </CommandItem>
                   )

@@ -88,7 +88,7 @@ export function AddCategoryModal({ onSubmit }: CategoryModalProps) {
                   autoComplete="off"
                   required
                 />
-                {false && <IconSelector selectedIcon={formData.category_icon} onSelectIcon={handleIconChange} />}
+                <IconSelector selectedIcon={formData.category_icon} onSelectIcon={handleIconChange} />
               </div>
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
