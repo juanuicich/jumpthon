@@ -2,10 +2,9 @@ import "server-only";
 import { eq, sql, and } from "drizzle-orm";
 import { db } from "~/server/db";
 import { accounts, categories, emails } from "./schema";
-import { auth } from "~/server/auth";
 
 export async function getUserEmails() {
-  const session = await auth();
+  const session = {};
 
   if (!session?.user?.id) {
     throw new Error("User not authenticated");
@@ -21,7 +20,7 @@ export async function getUserEmails() {
 export async function getUserAccounts(userId?: string) {
   let queryById: string;
   if (!userId) {
-    const session = await auth();
+    const session = {};
 
     if (!session?.user?.id) {
       throw new Error("User not authenticated");
@@ -60,7 +59,7 @@ export async function getUserEmailsWithFilters({
   read?: boolean;
   categoryId?: string;
 } = {}) {
-  const session = await auth();
+  const session = {};
 
   if (!session?.user?.id) {
     throw new Error("User not authenticated");
@@ -97,7 +96,7 @@ export async function getAccountById(id: string) {
 export async function getUserCategories(userId?: string) {
   let user_id;
   if (!userId) {
-    const session = await auth();
+    const session = {};
 
     if (!session?.user?.id) {
       throw new Error("User not authenticated");
