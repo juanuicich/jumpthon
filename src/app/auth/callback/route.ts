@@ -20,8 +20,8 @@ export async function GET(request: Request) {
       const { session } = data;
       const identities = session?.user.identities || [];
       if (session?.access_token) {
-        const jwt = jwtDecode(session.access_token);
-        const identity = identities.find(i => i.identity_data?.provider_id == jwt.user_metadata.provider_id);
+        const jwt = jwtDecode(session.access_token) as { user_metadata?: { provider_id?: string } };
+        const identity = identities.find(i => i.identity_data?.provider_id == jwt.user_metadata?.provider_id);
 
         await supabase.from('account').update({ refresh_token: session?.provider_refresh_token, access_token: session?.provider_token }).eq('identity_id', identity?.identity_id).select();
 

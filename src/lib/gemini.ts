@@ -12,12 +12,14 @@ interface Email {
   body: string;
 }
 
-interface Category {
-  name: string;
-  description: string;
+interface LLMResponse {
+  subject: string;
+  summary: string;
+  category: string;
+  unsub_link: string;
 }
 
-export async function classifyEmail(user: User, email: Email, categories: Category[]): Promise<Record<string, unknown>> {
+export async function classifyEmail(user: User, email: Email, categories: Category[]): Promise<LLMResponse> {
   console.log("Classifying email", user, email);
   const prompt = `Subject: ${email.subject}
 
@@ -37,7 +39,7 @@ The user's name is ${user.name} and their email address is ${user.email}`,
     schema: z.object({
       subject: z.string().describe("Short and straight to the point description of what the email is about, from the point of view of the receiving user. Aim for 4 words or less. This should be the most important information about the email, allowing the user to skim over the list and quickly understand what this is about."),
       summary: z.string().describe("Short and straight to the point description of the email contents and purpose, from the point of view of the receiving user. Aim for 30 words or less. If content is a list of \"top news\" or \"top links\" don't include that in the summary. If recipient must perform an action, mention that FIRST. Prioritize including names of the most important subjects, so the user can easily understand what the email is REALLY about. Avoid repeating any information that is already in the subject. If you include a noun or name in the subject key, avoid repeating it in the summary. Ideally NO WORDS should appear in both the subject and the summary in your response. Avoid duplication and superfluous text, prefer bullet points (joined by commas)."),
-      categories: z.array(z.string()).describe(`the names of the categories that are the most relevant. You can choose just one category, none, or multiple. The JSON object should include ONLY the names of the categories. The valid categories are as follows (only use the exact names):
+      category: z.string().describe(`the name of the category that is the most relevant. You can choose just one category or none. Respond with the name of the category. The valid categories are as follows (only use the exact name):
 
 ${categoryNames}`),
       unsub_link: z.string().describe("should include the raw URL of the link to unsubscribe from these emails, if available")

@@ -3,7 +3,14 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 function getClient() {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const supabaseUrl = process.env.SUPABASE_URL as string;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase credentials');
+  }
+
+  return createClient(supabaseUrl, supabaseKey);
 }
 
 export async function getAccountById(accountId: string) {
@@ -39,7 +46,7 @@ export async function getEmailsByAcccount(accountIds: string[]) {
   return emails;
 }
 
-export async function getUserCategories(userId: string) {
+export async function getUserCategories(userId: string): Promise<Category[]> {
   const supabase = getClient();
 
   const { data: categories, error } = await supabase
@@ -49,13 +56,15 @@ export async function getUserCategories(userId: string) {
 
   if (error || !categories) {
     console.error('Error querying categories schema:', { error, categories });
-    return;
+    return [];
   }
 
-  return categories;
+  return categories || [];
 }
 
-export async function insertEmails(emails: Email[]) {
+
+
+export async function insertEmails(emails: Partial<Email>[]) {
   const supabase = getClient();
 
   const { data, error } = await supabase

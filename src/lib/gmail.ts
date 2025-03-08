@@ -83,31 +83,32 @@ export async function fetchGmailEmail(
  * @param accountId The account ID in the database
  * @returns An authenticated OAuth2Client
  */
-export async function getAuthenticatedClient(accountId: string): Promise<any> {
-  try {
-    // Fetch the account from the database
-    const account = await getAccountById(accountId);
+export async function getGmailClient(accountId: string) {
+  const account = await getAccountById(accountId);
 
-    if (!account || !account.access_token) {
-      throw new Error("No Google account or auth token found");
-    }
-
-    const authClient = new OAuth2Client(
-      {
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        redirectUri: process.env.GOOGLE_REDIRECT_URI,
-        forceRefreshOnFailure: true
-      }
-    );
-
-    authClient.setCredentials({
-      access_token: account.access_token,
-    });
-
-    return { authClient: authClient, user: account.user };
-  } catch (error) {
-    console.error("Error getting authenticated client:", error);
-    throw error;
+  if (!account) {
+    throw new Error("Account not found");
   }
+
+  const authClient = new OAuth2Client(
+    {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      redirectUri: process.env.GOOGLE_REDIRECT_URI,
+      forceRefreshOnFailure: true
+    }
+  );
+
+  authClient.setCredentials({
+    access_token: account.access_token,
+  });
+
+  const user = {
+    id: account.user_id,
+    email: account.email,
+    name: account.name
+  }
+
+  return { authClient, user };
+
 }

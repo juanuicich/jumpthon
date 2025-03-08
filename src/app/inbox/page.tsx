@@ -249,7 +249,7 @@ export default function EmailInbox() {
 
 function EmailItem({ email, isSelected, onSelect, categories }: { email: Email; isSelected: boolean; onSelect: (id: string) => void; categories: Category[] }) {
   const [isHovered, setIsHovered] = useState(false)
-  const emailCategories = [];
+  let emailCategories: Category[] = [];
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent event from bubbling up
@@ -290,6 +290,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: { email: Email; 
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="p-1 rounded-full hover:bg-accent/50 transition-colors">
+                        {/* @ts-ignore */}
                         <DynamicIcon name={category.icon} className="h-4 w-4 text-muted-foreground stroke-2" />
                       </div>
                     </TooltipTrigger>
