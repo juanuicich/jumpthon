@@ -19,7 +19,9 @@ import { Textarea } from "~/components/ui/textarea"
 import { IconSelector } from "~/components/ui/icon_selector"
 
 interface CategoryModalProps {
-  onSubmit?: (data: CategoryFormData) => void
+  onSubmit?: (data: CategoryFormData) => void,
+  edit?: boolean,
+  category?: CategoryFormData
 }
 
 export interface CategoryFormData {
@@ -29,7 +31,7 @@ export interface CategoryFormData {
   recategorize: boolean
 }
 
-export function AddCategoryModal({ onSubmit }: CategoryModalProps) {
+export function AddCategoryModal({ onSubmit, edit, category }: CategoryModalProps) {
   const emptyState = {
     category_name: "",
     category_description: "",
@@ -57,6 +59,12 @@ export function AddCategoryModal({ onSubmit }: CategoryModalProps) {
     setOpen(false);
   }
 
+  const handleCancel = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormData(emptyState);
+    setOpen(false);
+  }
+
   const onOpenChange = () => {
     setOpen(!open);
   }
@@ -69,8 +77,10 @@ export function AddCategoryModal({ onSubmit }: CategoryModalProps) {
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add New Category</DialogTitle>
-            <DialogDescription>Create a new category for organizing your content.</DialogDescription>
+            <DialogTitle>{edit ? "Edit" : "Add New"} Category</DialogTitle>
+            <DialogDescription>
+              {edit ? "Edit the category details below." : "Create a new category for organizing your content."}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -123,6 +133,7 @@ export function AddCategoryModal({ onSubmit }: CategoryModalProps) {
             <input type="hidden" name="category_icon" value={formData.category_icon} />
           </div>
           <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleCancel} className="cursor-pointer">Cancel</Button>
             <Button type="submit" className="cursor-pointer">Save Category</Button>
           </DialogFooter>
         </form>
