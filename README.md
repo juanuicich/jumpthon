@@ -11,10 +11,10 @@ Check LICENSE file.
 - [ ] workflow to add additional Gmail accounts
 - [ ] show list of categories
 - [ ] add category with name and description
-- [ ] sort incoming emails by the categories using LLM
-- [ ] summarise processed emails by LLM
-- [ ] after email is processes, archive it
-- [ ] main UI should show list of all processed emails
+- [x] sort incoming emails by the categories using LLM
+- [x] summarise processed emails by LLM
+- [ ] after email is processed, archive it
+- [x] main UI should show list of all processed emails
 - [ ] filter by category
 - [ ] filter by inbox
 - [ ] when clicking on an email, open it in Gmail in a separate tab
