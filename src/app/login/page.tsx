@@ -49,7 +49,7 @@ export default function LoginScreen() {
         <div className="flex flex-col items-center space-y-2">
           <Dog className="h-16 w-16 text-primary" />
           <h1 className="text-4xl font-bold tracking-tight">Chompymail</h1>
-          <p className="text-muted-foreground">Your friendly email companion</p>
+          <p className="text-muted-foreground">Fetching your emails, chasing away spam</p>
         </div>
 
         <Button size="lg" className="w-full cursor-pointer min-w-[200px] text-lg" onClick={handleLogin} disabled={isLoading}>
