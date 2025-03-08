@@ -45,6 +45,7 @@ export type Database = {
       email: {
         Row: {
           category_id: string | null
+          content: string | null
           created_at: string
           from: string | null
           gmail_id: string | null
@@ -62,6 +63,7 @@ export type Database = {
         }
         Insert: {
           category_id?: string | null
+          content?: string | null
           created_at: string
           from?: string | null
           gmail_id?: string | null
@@ -79,6 +81,7 @@ export type Database = {
         }
         Update: {
           category_id?: string | null
+          content?: string | null
           created_at?: string
           from?: string | null
           gmail_id?: string | null
