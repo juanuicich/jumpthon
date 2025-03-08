@@ -195,7 +195,7 @@ export default function EmailInbox() {
 
           <main className="flex-1 overflow-auto">
             <div className="p-3 border-b flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 h-12">
                 <Checkbox
                   checked={selectedEmails.length === filteredEmails.length}
                   onCheckedChange={(checked) => {
@@ -205,7 +205,7 @@ export default function EmailInbox() {
                       setSelectedEmails([]);
                     }
                   }}
-                  className="mr-2"
+                  className="h-9 w-9 mr-2 rounded-full cursor-pointer"
                 />
                 {selectedEmails.length > 0 ? (
                   <>
@@ -292,20 +292,20 @@ function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) 
 
   return (
     <Card
-      className={`p-3 rounded-none hover:bg-accent/50 transition-colors ${!email.read ? 'bg-accent/20' : ''
+      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${!email.read ? 'bg-accent/20' : ''
         } ${isSelected ? 'bg-primary/10' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="flex items-start gap-3">
         <div
           className="relative cursor-pointer"
           onClick={handleSelectClick}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
         >
           {isSelected || isHovered ? (
             <Checkbox
               checked={isSelected}
-              className="h-9 w-9 rounded-full"
+              className="h-9 w-9 rounded-full cursor-pointer"
             />
           ) : (
             <Avatar className="h-9 w-9 shrink-0">
@@ -340,7 +340,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) 
           </div>
 
           <div className="text-sm">
-            <span className={`font-semibold ${!email.read ? '' : ''}`}>{email.subject}</span>
+            <span className="font-semibold">{email.subject}</span>
             {" "}
             <span className="text-muted-foreground">{email.preview}</span>
           </div>
