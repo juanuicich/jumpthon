@@ -8,8 +8,6 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user }, error: sessionError } = await supabase.auth.getUser();
 
-    console.log("user", user);
-
     if (sessionError || !user) {
       return NextResponse.json(
         { error: "Unauthorized" },
