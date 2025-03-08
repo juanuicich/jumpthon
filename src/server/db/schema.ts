@@ -16,6 +16,12 @@ import { type AdapterAccount } from "next-auth/adapters";
 
 export const createTable = pgTableCreator((name) => `jumpthon_${name}`);
 
+function randomColor(): string {
+  const colors = ['amber', 'blue', 'cyan', 'emerald', 'fuchsia', 'gray', 'green', 'indigo', 'lime', 'neutral', 'orange', 'pink', 'purple', 'red', 'rose', 'sky', 'slate', 'stone', 'teal', 'violet', 'yellow', 'zinc'];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+
 export const emails = createTable(
   "email",
   {
@@ -52,6 +58,7 @@ export const categories = createTable(
     name: varchar("name", { length: 255 }),
     icon: varchar("icon", { length: 255 }),
     description: text("description"),
+    color: varchar("color", { length: 63 }).default(() => randomColor()),
     ownedById: uuid("owned_by_id")
       .notNull()
       .references(() => users.id),

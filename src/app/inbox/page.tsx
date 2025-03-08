@@ -91,7 +91,7 @@ function useEmails(filters?: { starred?: boolean; read?: boolean; categoryId?: s
 
 // Custom hook to fetch user categories
 function useCategories() {
-  const [categories, setCategories] = useState<Array<{ id: string; name: string, icon: string }>>([]);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string, icon: string, color: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -160,7 +160,7 @@ export default function EmailInbox() {
         <div className="flex flex-1 overflow-hidden">
           <aside className="w-48 border-r p-3 hidden md:block">
             <div className="flex items-center gap-2 mb-4 px-2">
-              <Dog className="h-5 w-5" />
+              <Dog className="h-5 w-5 stroke-amber-600" />
               <h1 className="text-lg font-bold">Chompymail</h1>
             </div>
             <div className="space-y-1">
@@ -179,10 +179,10 @@ export default function EmailInbox() {
                 <Button
                   key={category.id}
                   variant={activeCategory === category.id ? "secondary" : "ghost"}
-                  className="w-full justify-start cursor-pointer"
+                  className={`w-full justify-start cursor-pointer`}
                   onClick={() => setActiveCategory(category.id)}
                 >
-                  <DynamicIcon name={category.icon} className="mr-2 h-4 w-4" color="black" />
+                  <DynamicIcon name={category.icon} className={`mr-2 h-4 w-4 stroke-slate-800`} />
                   {category.name}
                   <Badge className="ml-auto" variant="secondary">
                     ?
@@ -317,14 +317,14 @@ function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) 
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5">
-            <div className="font-semibold truncate max-w-[180px] sm:max-w-xs flex items-center">
+            <div className="truncate max-w-[180px] sm:max-w-xs flex items-center mr-2">
               {email.sender}
               {emailCategories.map(category => (
                 <TooltipProvider key={category.id}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="ml-2 p-1 rounded-full hover:bg-accent/50 transition-colors">
-                        <DynamicIcon name={category.icon} className="h-4 w-4 text-muted-foreground" />
+                      <div className="p-1 rounded-full hover:bg-accent/50 transition-colors">
+                        <DynamicIcon name={category.icon} className="h-4 w-4 text-muted-foreground stroke-2" />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
