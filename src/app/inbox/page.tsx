@@ -10,126 +10,111 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip"
 import { Filter, Inbox, Laptop, Plane, PiggyBank, Briefcase, Archive, Trash2, MailOpen, Dog } from "lucide-react"
 import { useEffect, useState } from "react";
-import { api } from "~/trpc/react";
+import { createClient } from "~/lib/supabase/client";
 
-// Add this constant for category icons
-const categoryIcons = {
-  ai: Laptop,
-  finance: PiggyBank,
-  travel: Plane,
-  work: Briefcase,
-}
-
-// Import necessary hooks and functions
-
-// Email interface based on the DB schema
-interface Email {
-  id: string;
-  sender: string;
-  from: string;
-  subject: string;
-  preview: string;
-  read: boolean;
-  starred: boolean;
-  gmailId: string;
-  categories: Record<string, boolean>;
-  createdAt: Date;
-  updatedAt: Date | null;
-}
-
-// Helper function to format date for display
-function formatEmailDate(date: Date): string {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (date >= today) {
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  } else if (date >= yesterday) {
-    return 'Yesterday';
-  } else {
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-  }
-}
 
 // Custom hook to fetch emails with optional filters
 function useEmails(filters?: { starred?: boolean; read?: boolean; categoryId?: string }) {
   const [emails, setEmails] = useState<Email[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const emailsQuery = api.email.getAll.useQuery();
+  const supabase = createClient();
 
   useEffect(() => {
-    setIsLoading(true);
-    if (emailsQuery.isSuccess) {
-      setEmails(emailsQuery.data);
-      setIsLoading(false);
-    } else if (emailsQuery.isError) {
-      console.error("Error fetching emails:", emailsQuery.error);
-      setError("Failed to load emails");
-      setIsLoading(false);
+    function fetchEmails() {
+      supabase
+        .from("email")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .then(({ data, error }) => {
+          if (error) {
+            console.error("Error fetching emails:", error);
+          } else {
+            console.log("Emails fetched:", data);
+            setEmails(data);
+            setIsLoading(false);
+          }
+        });
     }
-  }, [emailsQuery.isSuccess, emailsQuery.isError, emailsQuery.data, emailsQuery.error, filters?.starred, filters?.read, filters?.categoryId]);
 
-  // Transform DB emails to the format expected by the UI
-  const formattedEmails = emails.map(email => ({
-    id: email.id,
-    sender: email.sender || "Unknown sender",
-    email: email.from || "",
-    subject: email.subject || "No subject",
-    preview: email.preview || "",
-    date: email.createdAt ? formatEmailDate(new Date(email.createdAt)) : "",
-    read: email.read,
-    categories: email.categories,
-    avatar: "/placeholder.svg?height=40&width=40",
-  }));
+    const channel = supabase.channel("realtime emails").on("postgres_changes", {
+      event: "*",
+      schema: "public",
+      table: "email",
+    }, (payload) => {
+      console.log(payload);
+      fetchEmails();
+    }).subscribe();
 
-  return { emails: formattedEmails, isLoading, error };
+    fetchEmails();
+
+    // Clear the channel when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    }
+  }, [supabase, setEmails, setIsLoading]);
+
+  return { emails, isLoading, error };
 }
 
 // Custom hook to fetch user categories
 function useCategories() {
-  const [categories, setCategories] = useState<Array<{ id: string; name: string, icon: string, color: string }>>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const categoriesQuery = api.email.getCategories.useQuery();
+  const supabase = createClient();
 
   useEffect(() => {
-    setIsLoading(true);
-    if (categoriesQuery.isSuccess) {
-      setCategories(categoriesQuery.data);
-      setIsLoading(false);
-    } else if (categoriesQuery.isError) {
-      console.error("Error fetching categories:", categoriesQuery.error);
-      setError("Failed to load categories");
-      setIsLoading(false);
-    }
-  }, [categoriesQuery.isSuccess, categoriesQuery.isError, categoriesQuery.data, categoriesQuery.error]);
 
-  return { categories, isLoading, error };
+    function fetchCategories() {
+      supabase
+        .from("category")
+        .select("*, email(count)")
+        .order("name", { ascending: true })
+        .then(({ data, error }) => {
+          if (error) {
+            console.error("Error fetching categories:", error);
+          } else {
+            console.log("Categories fetched:", data);
+            setCategories(data);
+          }
+        });
+    }
+
+    const channel = supabase.channel("realtime emails").on("postgres_changes", {
+      event: "*",
+      schema: "public",
+      table: "category",
+    }, (payload) => {
+      console.log("Category update", payload);
+      fetchCategories();
+    }).subscribe();
+
+    fetchCategories();
+
+    // Clear the channel when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    }
+  }, [supabase, setCategories]);
+
+  return categories;
 }
 
 export default function EmailInbox() {
   // Use the custom hook to fetch emails
-  const { emails: emailList, isLoading, error } = useEmails();
-  const { categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
+  const { emails, isLoading, error } = useEmails();
+  const categories = useCategories();
   const [activeCategory, setActiveCategory] = useState("all")
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
 
   // Show loading state or error if needed
-  if (isLoading) return <div className="flex justify-center p-4">Loading emails...</div>;
+  // if (isLoading) return <div className="flex justify-center p-4">Loading emails...</div>;
   if (error) return <div className="text-red-500 p-4">{error}</div>;
 
-  const unreadCount = emailList.filter((email) => !email.read).length
-  const aiCount = emailList.filter((email) => email.category === "ai").length
-  const financeCount = emailList.filter((email) => email.category === "finance").length
-  const travelCount = emailList.filter((email) => email.category === "travel").length
+  const unreadCount = emails.length
 
   const filteredEmails =
-    activeCategory === "all" ? emailList : emailList.filter((email) => email.category === activeCategory)
+    activeCategory === "all" ? emails : [];
 
   const toggleEmailSelection = (id: string) => {
     setSelectedEmails(prev =>
@@ -138,7 +123,7 @@ export default function EmailInbox() {
   }
 
   const handleBatchAction = (action: 'read' | 'archive' | 'delete') => {
-    let updatedEmails = [...emailList]
+    let updatedEmails = [...emails]
     switch (action) {
       case 'read':
         updatedEmails = updatedEmails.map(email =>
@@ -150,14 +135,14 @@ export default function EmailInbox() {
         updatedEmails = updatedEmails.filter(email => !selectedEmails.includes(email.id))
         break
     }
-    setEmailList(updatedEmails)
+    console.log(`Updating emails with action: ${action}`, { updatedEmails });
     setSelectedEmails([])
   }
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-48 border-r p-3 hidden md:block">
+        <aside className="w-48 border-r p-3 hidden md:block h-screen">
           <div className="flex items-center gap-2 mb-4 px-2">
             <Dog className="h-5 w-5 stroke-amber-600" />
             <h1 className="text-lg font-bold">Chompymail</h1>
@@ -181,11 +166,10 @@ export default function EmailInbox() {
                 className={`w-full justify-start cursor-pointer`}
                 onClick={() => setActiveCategory(category.id)}
               >
-                <DynamicIcon name={category.icon} className={`mr-2 h-4 w-4 stroke-slate-800`} />
+                <DynamicIcon name={(category.icon || "email") as any} className={`mr-2 h-4 w-4 stroke-slate-800`} />
                 {category.name}
                 <Badge className="ml-auto" variant="secondary">
-                  ?
-                  {/* {emailList.filter(email => email.category === category.id).length} */}
+                  {category?.email[0].count as any}
                 </Badge>
               </Button>
             ))}
@@ -263,25 +247,9 @@ export default function EmailInbox() {
   )
 }
 
-interface EmailItemProps {
-  email: {
-    id: string
-    sender: string
-    email: string
-    subject: string
-    preview: string
-    date: string
-    read: boolean
-    categories: string[]
-    avatar: string
-  }
-  isSelected: boolean
-  onSelect: (id: string) => void
-}
-
-function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) {
+function EmailItem({ email, isSelected, onSelect, categories }: { email: Email; isSelected: boolean; onSelect: (id: string) => void; categories: Category[] }) {
   const [isHovered, setIsHovered] = useState(false)
-  const emailCategories = categories.filter(category => email.categories.includes(category.id));
+  const emailCategories = [];
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent event from bubbling up
@@ -307,8 +275,8 @@ function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) 
             />
           ) : (
             <Avatar className="h-9 w-9 shrink-0">
-              <AvatarImage src={email.avatar} alt={email.sender} />
-              <AvatarFallback>{email.sender.charAt(0)}</AvatarFallback>
+              {/* <AvatarImage src={email.avatar} alt={email.sender} /> */}
+              <AvatarFallback>{email.sender}</AvatarFallback>
             </Avatar>
           )}
         </div>
@@ -333,7 +301,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) 
               ))}
             </div>
             <div className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-              {email.date}
+              {email.created_at}
             </div>
           </div>
 
