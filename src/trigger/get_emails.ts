@@ -9,7 +9,7 @@ export const getEmailTask = task({
   id: "get-email",
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
   queue: {
-    concurrencyLimit: 1,
+    concurrencyLimit: 10,
   },
   retry: {
     maxAttempts: 1
