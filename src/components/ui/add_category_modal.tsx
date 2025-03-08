@@ -17,26 +17,30 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Textarea } from "~/components/ui/textarea"
 import { IconSelector } from "~/components/ui/icon_selector"
+import { ideahub } from "googleapis/build/src/apis/ideahub"
 
 interface CategoryModalProps {
   onSubmit?: (data: CategoryFormData) => void,
   edit?: boolean,
-  category?: CategoryFormData
+  category?: Category
 }
 
 export interface CategoryFormData {
   category_name: string,
   category_description: string,
   category_icon: string,
-  recategorize: boolean
+  recategorize: boolean,
+  id?: string
 }
 
 export function AddCategoryModal({ onSubmit, edit, category }: CategoryModalProps) {
+  console.log("AddCategoryModal", category);
   const emptyState = {
-    category_name: "",
-    category_description: "",
-    category_icon: "dog",
+    category_name: category?.name || "",
+    category_description: category?.description || "",
+    category_icon: category?.icon || "dog",
     recategorize: false,
+    id: category?.id || ""
   };
 
   const [open, setOpen] = useState(false);
@@ -72,7 +76,7 @@ export function AddCategoryModal({ onSubmit, edit, category }: CategoryModalProp
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">Add New Category</Button>
+        <Button variant="outline" className="cursor-pointer">{edit ? "Edit" : "Add New"}  Category</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>

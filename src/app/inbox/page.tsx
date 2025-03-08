@@ -10,6 +10,7 @@ import { RemoveCategoryDialog } from "~/components/ui/remove-category-dialog";
 import { CategorySwitcher } from "~/components/ui/category_switcher";
 import { EmailItem } from '~/components/ui/email_item';
 import { KeyboardShortcutsModal } from '~/components/ui/keyboard_shortcuts_modal';
+import { Icon } from "~/components/ui/icon";
 import { AddCategoryModal, CategoryFormData } from "~/components/ui/add_category_modal";
 import { useEmails } from '~/components/hooks/use_emails';
 import { useCategories } from '~/components/hooks/use_categories';
@@ -19,9 +20,21 @@ import { useKeyboardShortcuts } from '~/components/hooks/use_keyboard_shortcuts'
 export default function EmailInbox() {
   // Use the custom hook to fetch emails
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
+  const [openCategorySwitcher, setOpenCategorySwitcher] = useState(false)
   const categories = useCategories();
   const { emails, isLoading, error } = useEmails({ categoryId: selectedCategory });
+
+  useEffect(() => {
+    if (selectedCategory) {
+      const category = categories.find(cat => cat.id === selectedCategory);
+      setActiveCategory(category || null);
+    } else {
+      setActiveCategory(null);
+    }
+  }, [selectedCategory, categories]);
+
 
   // Function to trigger email fetching task
   const fetchEmails = async () => {
@@ -47,7 +60,7 @@ export default function EmailInbox() {
     fetchEmails();
   }, []);
 
-  async function addCategory(category: CategoryFormData) {
+  async function upsertCategory(category: CategoryFormData) {
     // Post the category data to the API /api/add-category
     try {
       const response = await fetch('/api/add-category', {
@@ -69,8 +82,7 @@ export default function EmailInbox() {
 
   const handleAddCategory = (data: CategoryFormData) => {
     console.log("Category data:", data)
-    addCategory(data);
-
+    upsertCategory(data);
   }
 
   const toggleEmailSelection = (id: string) => {
@@ -121,7 +133,9 @@ export default function EmailInbox() {
     openEmail: () => { },
     unsubscribeEmail: () => { },
     deleteEmail: () => { },
-    selectCategory: () => { },
+    selectCategory: () => {
+      setOpenCategorySwitcher(true);
+    },
     selectAccount: () => { },
     openModal: () => {
       console.log("Opening keyboard shortcuts modal");
@@ -130,6 +144,7 @@ export default function EmailInbox() {
   }
 
   const { shortcuts } = useKeyboardShortcuts(handlers);
+  console.log({ shortcuts });
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">
@@ -187,6 +202,7 @@ export default function EmailInbox() {
                   setSelectedCategory(category.id)
                   console.log("Selected category:", category)
                 }}
+                open={openCategorySwitcher}
                 categories={categories}
                 modalTitle="Select category"
               />
@@ -218,14 +234,24 @@ export default function EmailInbox() {
                 className="h-9 w-9 mr-2 rounded-full cursor-pointer"
               />
 
-              <Button variant="outline" disabled={selectedEmails.length == 0} size="sm" onClick={() => handleBatchAction('delete')} className="cursor-pointer">
-                <DynamicIcon name="trash-2" className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-              <Button variant="outline" disabled={selectedEmails.length == 0} size="sm" onClick={() => handleBatchAction('read')} className="cursor-pointer" title="Use AI agent to unsubscribe">
-                <DynamicIcon name="bot" className="h-4 w-4 mr-2" />
-                Delete & unsub
-              </Button>
+              {selectedEmails.length > 0 &&
+                <>
+                  <Button variant="outline" disabled={selectedEmails.length == 0} size="sm" onClick={() => handleBatchAction('delete')} className="cursor-pointer">
+                    <DynamicIcon name="trash-2" className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                  <Button variant="outline" disabled={selectedEmails.length == 0} size="sm" onClick={() => handleBatchAction('read')} className="cursor-pointer" title="Use AI agent to unsubscribe">
+                    <DynamicIcon name="bot" className="h-4 w-4 mr-2" />
+                    Delete & unsub
+                  </Button>
+                </>}
+              {selectedEmails.length === 0 && activeCategory &&
+                <div className="flex items-center gap-2">
+                  <Icon name={activeCategory?.icon} className="h-6 w-6 mr-2" />
+                  <div className="text-lg mr-4">{activeCategory?.name}</div>
+                  <AddCategoryModal onSubmit={handleAddCategory} edit={true} category={activeCategory} />
+                </div>
+              }
 
             </div>
             <div className="text-sm text-muted-foreground pr-4 my-auto">

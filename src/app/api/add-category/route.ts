@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "~/lib/supabase/server";
 import { getEmailTask } from "~/trigger/get_emails";
 import { CategoryFormData } from "~/components/ui/add_category_modal";
+import { isNativeError } from "util/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,28 +30,47 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert the new category into the database
-    const { data: newCategory, error: insertError } = await supabase
-      .from('category')
-      .insert({
-        name: categoryData.category_name,
-        description: categoryData.category_description || '',
-        icon: categoryData.category_icon || null,
-        user_id: user.id,
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error("Error creating category:", insertError);
-      return NextResponse.json(
-        { error: "Failed to create category" },
-        { status: 500 }
-      );
+    if (categoryData.id) {
+      const { data: updatedCategory, error } = await supabase
+        .from('category')
+        .update({
+          name: categoryData.category_name,
+          description: categoryData.category_description || '',
+          icon: categoryData.category_icon || null,
+        })
+        .eq('id', categoryData.id)
+        .select()
+        .single();
+      if (error) {
+        console.error("Error updating category:", error);
+        return NextResponse.json(
+          { error: "Failed to update category" },
+          { status: 500 }
+        );
+      }
+    } else {
+      const { data: newCategory, error } = await supabase
+        .from('category')
+        .insert({
+          name: categoryData.category_name,
+          description: categoryData.category_description || '',
+          icon: categoryData.category_icon || null,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      if (error) {
+        console.error("Error creating category:", error);
+        return NextResponse.json(
+          { error: "Failed to create category" },
+          { status: 500 }
+        );
+      }
     }
 
     // Handle recategorization if requested
-    if (categoryData.recategorize && newCategory) {
+    if (categoryData.recategorize) {
       // Get all emails from user
       const { data } = await supabase
         .from('email')

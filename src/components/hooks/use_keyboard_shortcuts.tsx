@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useCallback } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 
 type ShortcutCategory = {
