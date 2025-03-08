@@ -10,7 +10,7 @@ Check LICENSE file.
 - [x] get access to email account
 - [ ] workflow to add additional Gmail accounts
 - [ ] show list of categories
-- [ ] add category with name and description
+- [x] add category with name and description
 - [x] sort incoming emails by the categories using LLM
 - [x] summarise processed emails by LLM
 - [ ] after email is processed, archive it

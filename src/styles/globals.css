@@ -23,6 +23,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -31,6 +32,7 @@
     border-color: var(--color-gray-200, currentColor);
   }
 }
+
 /*
   ---break---
 */
@@ -48,7 +50,7 @@
   --popover-foreground:
     oklch(0.145 0 0);
   --primary:
-    oklch(0.205 0 0);
+    oklch(0.666 0.179 58.318);
   --primary-foreground:
     oklch(0.985 0 0);
   --secondary:
@@ -60,7 +62,7 @@
   --muted-foreground:
     oklch(0.556 0 0);
   --accent:
-    oklch(0.97 0 0);
+    oklch(0.852 0.199 91.936);
   --accent-foreground:
     oklch(0.205 0 0);
   --destructive:
@@ -102,6 +104,7 @@
   --sidebar-ring:
     oklch(0.708 0 0);
 }
+
 /*
   ---break---
 */
@@ -119,7 +122,7 @@
   --popover-foreground:
     oklch(0.985 0 0);
   --primary:
-    oklch(0.985 0 0);
+    oklch(0.666 0.179 58.318);
   --primary-foreground:
     oklch(0.205 0 0);
   --secondary:
@@ -171,6 +174,7 @@
   --sidebar-ring:
     oklch(0.439 0 0);
 }
+
 /*
   ---break---
 */
@@ -248,6 +252,7 @@
   --color-sidebar-ring:
     var(--sidebar-ring);
 }
+
 /*
   ---break---
 */
@@ -255,6 +260,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

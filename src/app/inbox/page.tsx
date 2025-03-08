@@ -155,113 +155,111 @@ export default function EmailInbox() {
   }
 
   return (
-    <TooltipProvider>
-      <div className="flex flex-col h-full max-h-screen bg-background">
-        <div className="flex flex-1 overflow-hidden">
-          <aside className="w-48 border-r p-3 hidden md:block">
-            <div className="flex items-center gap-2 mb-4 px-2">
-              <Dog className="h-5 w-5 stroke-amber-600" />
-              <h1 className="text-lg font-bold">Chompymail</h1>
-            </div>
-            <div className="space-y-1">
+    <div className="flex flex-col h-full max-h-screen bg-background">
+      <div className="flex flex-1 overflow-hidden">
+        <aside className="w-48 border-r p-3 hidden md:block">
+          <div className="flex items-center gap-2 mb-4 px-2">
+            <Dog className="h-5 w-5 stroke-amber-600" />
+            <h1 className="text-lg font-bold">Chompymail</h1>
+          </div>
+          <div className="space-y-1">
+            <Button
+              variant={activeCategory === "all" ? "secondary" : "ghost"}
+              className="w-full justify-start cursor-pointer"
+              onClick={() => setActiveCategory("all")}
+            >
+              <Inbox className="mr-2 h-4 w-4" />
+              All Mail
+              <Badge className="ml-auto" variant="secondary">
+                {unreadCount}
+              </Badge>
+            </Button>
+            {categories.map(category => (
               <Button
-                variant={activeCategory === "all" ? "secondary" : "ghost"}
-                className="w-full justify-start cursor-pointer"
-                onClick={() => setActiveCategory("all")}
+                key={category.id}
+                variant={activeCategory === category.id ? "secondary" : "ghost"}
+                className={`w-full justify-start cursor-pointer`}
+                onClick={() => setActiveCategory(category.id)}
               >
-                <Inbox className="mr-2 h-4 w-4" />
-                All Mail
+                <DynamicIcon name={category.icon} className={`mr-2 h-4 w-4 stroke-slate-800`} />
+                {category.name}
                 <Badge className="ml-auto" variant="secondary">
-                  {unreadCount}
+                  ?
+                  {/* {emailList.filter(email => email.category === category.id).length} */}
                 </Badge>
               </Button>
-              {categories.map(category => (
-                <Button
-                  key={category.id}
-                  variant={activeCategory === category.id ? "secondary" : "ghost"}
-                  className={`w-full justify-start cursor-pointer`}
-                  onClick={() => setActiveCategory(category.id)}
-                >
-                  <DynamicIcon name={category.icon} className={`mr-2 h-4 w-4 stroke-slate-800`} />
-                  {category.name}
-                  <Badge className="ml-auto" variant="secondary">
-                    ?
-                    {/* {emailList.filter(email => email.category === category.id).length} */}
-                  </Badge>
-                </Button>
-              ))}
-            </div>
-          </aside>
+            ))}
+          </div>
+        </aside>
 
-          <main className="flex-1 overflow-auto">
-            <div className="p-3 border-b flex items-center justify-between">
-              <div className="flex items-center gap-2 h-12">
-                <Checkbox
-                  checked={selectedEmails.length === filteredEmails.length}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedEmails(filteredEmails.map(email => email.id));
-                    } else {
-                      setSelectedEmails([]);
-                    }
-                  }}
-                  className="h-9 w-9 mr-2 rounded-full cursor-pointer"
-                />
-                {selectedEmails.length > 0 ? (
-                  <>
-                    <Button variant="outline" size="sm" onClick={() => handleBatchAction('read')}>
-                      <MailOpen className="h-4 w-4 mr-2" />
-                      Mark as Read
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleBatchAction('archive')}>
-                      <Archive className="h-4 w-4 mr-2" />
-                      Archive
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleBatchAction('delete')}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Select defaultValue="newest">
-                      <SelectTrigger className="w-[150px]">
-                        <SelectValue placeholder="Sort by" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="newest">Newest first</SelectItem>
-                        <SelectItem value="oldest">Oldest first</SelectItem>
-                        <SelectItem value="unread">Unread first</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="icon">
-                      <Filter className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {selectedEmails.length > 0
-                  ? `${selectedEmails.length} selected`
-                  : `${filteredEmails.length} messages`}
-              </div>
+        <main className="flex-1 overflow-auto">
+          <div className="p-3 border-b flex items-center justify-between">
+            <div className="flex items-center gap-2 h-12">
+              <Checkbox
+                checked={selectedEmails.length === filteredEmails.length}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setSelectedEmails(filteredEmails.map(email => email.id));
+                  } else {
+                    setSelectedEmails([]);
+                  }
+                }}
+                className="h-9 w-9 mr-2 rounded-full cursor-pointer"
+              />
+              {selectedEmails.length > 0 ? (
+                <>
+                  <Button variant="outline" size="sm" onClick={() => handleBatchAction('read')}>
+                    <MailOpen className="h-4 w-4 mr-2" />
+                    Mark as Read
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleBatchAction('archive')}>
+                    <Archive className="h-4 w-4 mr-2" />
+                    Archive
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleBatchAction('delete')}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Select defaultValue="newest">
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest first</SelectItem>
+                      <SelectItem value="oldest">Oldest first</SelectItem>
+                      <SelectItem value="unread">Unread first</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" size="icon">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </div>
+            <div className="text-sm text-muted-foreground">
+              {selectedEmails.length > 0
+                ? `${selectedEmails.length} selected`
+                : `${filteredEmails.length} messages`}
+            </div>
+          </div>
 
-            <div className="divide-y">
-              {filteredEmails.map((email) => (
-                <EmailItem
-                  key={email.id}
-                  email={email}
-                  categories={categories}
-                  isSelected={selectedEmails.includes(email.id)}
-                  onSelect={toggleEmailSelection}
-                />
-              ))}
-            </div>
-          </main>
-        </div>
+          <div className="divide-y">
+            {filteredEmails.map((email) => (
+              <EmailItem
+                key={email.id}
+                email={email}
+                categories={categories}
+                isSelected={selectedEmails.includes(email.id)}
+                onSelect={toggleEmailSelection}
+              />
+            ))}
+          </div>
+        </main>
       </div>
-    </TooltipProvider>
+    </div>
   )
 }
 
@@ -292,7 +290,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) 
 
   return (
     <Card
-      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${!email.read ? 'bg-accent/20' : ''
+      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${email.read ? 'bg-accent/20' : ''
         } ${isSelected ? 'bg-primary/10' : ''}`}
     >
       <div className="flex items-start gap-3">
@@ -328,7 +326,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) 
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="capitalize">{category.name}</p>
+                      <p>{category.name}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
