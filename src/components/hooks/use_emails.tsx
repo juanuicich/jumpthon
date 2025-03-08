@@ -11,7 +11,7 @@ export function useEmails(filters?: { starred?: boolean; read?: boolean; categor
 
   useEffect(() => {
     function fetchEmails() {
-      console.log("Fetching emails with filters:", filters);
+      console.log("Fetching emails with category:", categoryId);
       let query = supabase.from("email").select("*").order("created_at", { ascending: false });
 
       if (categoryId) {
