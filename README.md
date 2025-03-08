@@ -9,13 +9,13 @@ Check LICENSE file.
 - [x] auth with Google
 - [x] get access to email account
 - [ ] workflow to add additional Gmail accounts
-- [ ] show list of categories
+- [x show list of categories
 - [x] add category with name and description
 - [x] sort incoming emails by the categories using LLM
 - [x] summarise processed emails by LLM
 - [ ] after email is processed, archive it
 - [x] main UI should show list of all processed emails
-- [ ] filter by category
+- [x] filter by category
 - [ ] filter by inbox
 - [ ] when clicking on an email, open it in Gmail in a separate tab
 - [ ] an email can be deleted -> should delete original email
