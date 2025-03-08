@@ -1,28 +1,8 @@
+import "server-only";
 import { gmail_v1, google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import { getAccountById } from '~/server/db/queries';
 
-/**
- * Creates an authenticated OAuth2Client using environment variables and access token
- * @param accessToken The Google access token
- * @returns Authenticated OAuth2Client
- */
-export function createOAuth2Client(accessToken: string): OAuth2Client {
-  const oauth2Client = new OAuth2Client(
-    {
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      redirectUri: process.env.GOOGLE_REDIRECT_URI,
-      forceRefreshOnFailure: true
-    }
-  );
-
-  oauth2Client.setCredentials({
-    access_token: accessToken
-  });
-
-  return oauth2Client;
-}
 
 /**
  * Fetches a list of messages from the Gmail inbox
@@ -90,17 +70,21 @@ export async function getGmailClient(accountId: string) {
     throw new Error("Account not found");
   }
 
-  const authClient = new OAuth2Client(
-    {
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      redirectUri: process.env.GOOGLE_REDIRECT_URI,
-      forceRefreshOnFailure: true
-    }
-  );
+  const options = {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    redirectUri: process.env.GOOGLE_REDIRECT_URI,
+    forceRefreshOnFailure: true
+  };
+
+  console.log('Account', { account });
+  console.log('ClientOptions', { options });
+
+  const authClient = new OAuth2Client(options);
 
   authClient.setCredentials({
     access_token: account.access_token,
+    refresh_token: account.refresh_token,
   });
 
   const user = {
