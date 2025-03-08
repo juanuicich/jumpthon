@@ -29,14 +29,14 @@ ${email.body}`;
 
   const result = await generateObject({
     model: google('gemini-2.0-flash-001'),
-    system: `You job is to analyze the email provided by the user and return a JSON object with key information about it.
+    system: `You job is to analyze and summarize the email provided by the user and return a JSON object with key information. Focus on succint actionable information that the user can quickly understand and act upon. The email should be summarized in a way that is easy to understand and act upon.
 
 Context:
 The user's name is ${user.name} and their email address is ${user.email}`,
     prompt,
     schema: z.object({
-      subject: z.string().describe("a short, straight to the point description of what the email is about, from the point of view of the receiving user. Aim for 4 words or less. This should be the most important information about the email, allowing the user to skim over the list and quickly understand what this is about."),
-      summary: z.string().describe("a short straight to the point description of the email contents and purpose, from the point of view of the receiving user. Aim for 20 words or less. It should fit in a push notification. Prioritize including names of the most important subjects, so the user can easily understand what the email is REALLY about. Avoid repeating any information that is already in the subject. If you include a noun or name in the subject key, avoid repeating it in the summary. Ideally NO WORDS should appear in both the subject and the summary in your response. Avoid duplication."),
+      subject: z.string().describe("Short and straight to the point description of what the email is about, from the point of view of the receiving user. Aim for 4 words or less. This should be the most important information about the email, allowing the user to skim over the list and quickly understand what this is about."),
+      summary: z.string().describe("Short and straight to the point description of the email contents and purpose, from the point of view of the receiving user. Aim for 30 words or less. If content is a list of \"top news\" or \"top links\" don't include that in the summary. If recipient must perform an action, mention that FIRST. Prioritize including names of the most important subjects, so the user can easily understand what the email is REALLY about. Avoid repeating any information that is already in the subject. If you include a noun or name in the subject key, avoid repeating it in the summary. Ideally NO WORDS should appear in both the subject and the summary in your response. Avoid duplication and superfluous text, prefer bullet points (joined by commas)."),
       categories: z.array(z.string()).describe(`the names of the categories that are the most relevant. You can choose just one category, none, or multiple. The JSON object should include ONLY the names of the categories. The valid categories are as follows (only use the exact names):
 
 ${categoryNames}`),
