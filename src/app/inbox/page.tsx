@@ -63,7 +63,7 @@ export default function EmailInbox() {
   async function upsertCategory(category: CategoryFormData) {
     // Post the category data to the API /api/add-category
     try {
-      const response = await fetch('/api/add-category', {
+      const response = await fetch('/api/category', {
         method: 'POST',
         body: JSON.stringify(category),
         headers: {
@@ -250,6 +250,10 @@ export default function EmailInbox() {
                   <Icon name={activeCategory?.icon} className="h-6 w-6 mr-2" />
                   <div className="text-lg mr-4">{activeCategory?.name}</div>
                   <AddCategoryModal onSubmit={handleAddCategory} edit={true} category={activeCategory} />
+                  <Button variant="outline" onClick={() => handleRemoveCategory(activeCategory)} className="cursor-pointer">
+                    <DynamicIcon name="trash-2" className="h-4 w-4" />
+                    Delete Category
+                  </Button>
                 </div>
               }
 
