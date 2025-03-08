@@ -10,6 +10,7 @@ import { RemoveCategoryDialog } from "~/components/ui/remove-category-dialog";
 import { CategorySwitcher } from "~/components/ui/category_switcher";
 import { EmailItem } from '~/components/ui/email_item';
 import { KeyboardShortcutsModal } from '~/components/ui/keyboard_shortcuts_modal';
+import { AddCategoryModal, CategoryFormData } from "~/components/ui/add_category_modal";
 import { useEmails } from '~/components/hooks/use_emails';
 import { useCategories } from '~/components/hooks/use_categories';
 import { useKeyboardShortcuts } from '~/components/hooks/use_keyboard_shortcuts';
@@ -46,7 +47,9 @@ export default function EmailInbox() {
     fetchEmails();
   }, []);
 
-  const unreadCount = emails.length
+  const handleAddCategory = (data: CategoryFormData) => {
+    console.log("Category data:", data)
+  }
 
   const toggleEmailSelection = (id: string) => {
     setSelectedEmails(prev =>
@@ -166,10 +169,7 @@ export default function EmailInbox() {
                 modalTitle="Select category"
               />
               <div className="mt-4 w-full px-2 text-left">
-                <Button variant="outline" size="sm" onClick={() => handleBatchAction('read')} className="cursor-pointer">
-                  <DynamicIcon name="plus" className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
+                <AddCategoryModal onSubmit={handleAddCategory} />
               </div>
             </div>
             <div className="px-2">
