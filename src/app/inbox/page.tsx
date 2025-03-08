@@ -107,6 +107,33 @@ export default function EmailInbox() {
   const [activeCategory, setActiveCategory] = useState("all")
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
 
+  // Function to trigger email fetching
+  const fetchEmails = async () => {
+    try {
+      const response = await fetch('/api/fetch-emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch emails');
+      }
+
+      const result = await response.json();
+      console.log('Email fetch triggered:', result);
+    } catch (error) {
+      console.error('Error triggering email fetch:', error);
+    }
+  };
+
+  // Trigger email fetching on component mount
+  useEffect(() => {
+    fetchEmails();
+  }, []);
+
   // Show loading state or error if needed
   // if (isLoading) return <div className="flex justify-center p-4">Loading emails...</div>;
   if (error) return <div className="text-red-500 p-4">{error}</div>;
@@ -260,8 +287,7 @@ function EmailItem({ email, isSelected, onSelect, categories }: { email: Email; 
 
   return (
     <Card
-      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${!email.read ? 'bg-accent/20' : ''
-        } ${isSelected ? 'bg-primary/10' : ''}`}
+      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary/10' : ''}`}
     >
       <div className="flex items-start gap-3">
         <div
