@@ -116,8 +116,8 @@ export default function EmailInbox() {
           onOpenChange={setIsConfirmOpen}
         />
       )}
-      <div className="flex flex-1 overflow-hidden max-w-7xl mx-auto">
-        <aside className="w-56 p-3 hidden md:block h-screen">
+      <div className="flex flex-1 overflow-hidden w-full max-w-7xl mx-auto">
+        <aside className="w-56 p-3 hidden md:block h-screen flex-none">
           <div className="h-full w-full flex justify-between flex-col">
             <div className="flex items-center gap-2 mb-4 px-2">
               <Dog className="h-5 w-5 stroke-amber-600" />
@@ -131,9 +131,6 @@ export default function EmailInbox() {
               >
                 <Inbox className="mr-2 h-4 w-4" />
                 All Mail
-                <Badge className="ml-auto" variant="secondary">
-                  {unreadCount}
-                </Badge>
               </Button>
               {categories.map(category => (
                 <Button
@@ -184,7 +181,7 @@ export default function EmailInbox() {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-auto border-l border-r">
+        <main className="overflow-y-auto border-l border-r w-full">
           <div className="sticky top-0 z-10 p-3 border-b backdrop-blur-md bg-white/90 dark:bg-black/50 flex justify-between w-full">
             <div className="flex items-center gap-2 h-12">
               <Checkbox

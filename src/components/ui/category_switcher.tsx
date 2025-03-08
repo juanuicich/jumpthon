@@ -49,7 +49,7 @@ export function CategorySwitcher({
     const results = fuse.search(query)
     const filtered = results.map((result) => result.item)
     setFilteredCategories(filtered)
-  }, [query, fuse, categories])
+  }, [query])
 
   // Focus input when modal opens
   useEffect(() => {
