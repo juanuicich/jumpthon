@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { getUserEmails, getUserEmailsWithFilters } from "~/server/db/queries";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { getUserCategories, getUserEmails, getUserEmailsWithFilters } from "~/server/db/queries";
 
 export const emailRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async () => {
@@ -18,4 +18,8 @@ export const emailRouter = createTRPCRouter({
     .query(async ({ input }) => {
       return getUserEmailsWithFilters(input);
     }),
+
+  getCategories: protectedProcedure.query(async () => {
+    return getUserCategories();
+  }),
 });

@@ -1,7 +1,7 @@
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { classifyEmail } from "~/lib/gemini";
 import { fetchGmailEmail, fetchGmailInbox, getAuthenticatedClient } from "~/lib/gmail";
-import { getEmailsByAcccount, saveEmail } from "~/server/db/queries";
+import { getEmailsByAcccount, getUserCategories, saveEmail } from "~/server/db/queries";
 import { parseEmailSender } from "~/lib/utils"
 
 // Get a single email from a user's Gmail inbox and process it
@@ -24,6 +24,7 @@ export const getEmailTask = task({
       logger.log("Authenticated client", user);
 
       const email = await fetchGmailEmail(authClient, payload.gmailId);
+      const categories = await getUserCategories(user.id);
 
       logger.log("Got email", email);
 
@@ -49,8 +50,11 @@ export const getEmailTask = task({
       }, {
         subject: email.payload?.headers?.find(header => header.name === "Subject")?.value || "",
         body: emailBody
-      });
+      }, categories);
 
+      logger.log("LLM response", summarized);
+
+      const categoryIds = categories.filter(category => summarized.categories.includes(category.name)).map(category => category.id);
       const sender = parseEmailSender(email.payload?.headers?.find(header => header.name === "From")?.value || "");
 
       const dbEmail = {
@@ -64,6 +68,7 @@ export const getEmailTask = task({
         ownedById: payload.accountId,
         unsubLink: summarized.unsub_link,
         unread: email.payload?.labelIds?.includes("UNREAD"),
+        categories: categoryIds
       };
 
       logger.log("Saving email", dbEmail);
@@ -97,7 +102,7 @@ export const getAllGmailEmailsTask = task({
 
       // Check which emails aren't in the DB
       // Get user's emails from the DB to check which ones we already have
-      const userEmails = await getEmailsByAcccount(payload.accountId);
+      const userEmails = await getEmailsByAcccount([payload.accountId]);
       const existingGmailIds = new Set(userEmails.map(email => email.gmailId));
       logger.log("Existing Gmail IDs", existingGmailIds);
 

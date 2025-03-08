@@ -1,7 +1,7 @@
 import "server-only";
 import { eq, sql, and } from "drizzle-orm";
 import { db } from "~/server/db";
-import { accounts, emails } from "./schema";
+import { accounts, categories, emails } from "./schema";
 import { auth } from "~/server/auth";
 
 export async function getUserEmails() {
@@ -18,15 +18,22 @@ export async function getUserEmails() {
   return userEmails;
 }
 
-export async function getUserAccounts() {
-  const session = await auth();
+export async function getUserAccounts(userId?: string) {
+  let queryById: string;
+  if (!userId) {
+    const session = await auth();
 
-  if (!session?.user?.id) {
-    throw new Error("User not authenticated");
+    if (!session?.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    queryById = session.user.id;
+  } else {
+    queryById = userId;
   }
 
   const userAccounts = await db.query.accounts.findMany({
-    where: eq(accounts.userId, session.user.id),
+    where: eq(accounts.userId, queryById),
     orderBy: (accounts, { asc }) => [asc(accounts.provider)],
   });
 
@@ -87,6 +94,28 @@ export async function getAccountById(id: string) {
   return account;
 }
 
+export async function getUserCategories(userId?: string) {
+  let user_id;
+  if (!userId) {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("User not authenticated");
+    }
+
+    user_id = session.user.id;
+  } else {
+    user_id = userId;
+  }
+
+  const userCategories = await db.query.categories.findMany({
+    where: eq(categories.ownedById, user_id),
+    orderBy: (categories, { asc }) => [asc(categories.name)],
+  });
+
+  return userCategories;
+}
+
 export async function saveEmail(emailData: Omit<typeof emails.$inferInsert, "id" | "createdAt" | "updatedAt">) {
   const result = await db.insert(emails)
     .values(emailData)
@@ -95,9 +124,9 @@ export async function saveEmail(emailData: Omit<typeof emails.$inferInsert, "id"
   return result.length > 0 ? result[0] : null;
 }
 
-export async function updateAccountAccessToken(accountId: string, accessToken: string) {
+export async function updateAccountTokens(accountId: string, accessToken: string, refreshToken: string) {
   const result = await db.update(accounts)
-    .set({ access_token: accessToken })
+    .set({ access_token: accessToken, refresh_token: refreshToken })
     .where(eq(accounts.id, accountId))
     .returning({ updatedId: accounts.id });
 

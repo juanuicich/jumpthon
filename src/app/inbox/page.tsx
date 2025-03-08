@@ -1,13 +1,14 @@
 "use client"
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { DynamicIcon } from 'lucide-react/dynamic';
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import { Card } from "~/components/ui/card"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip"
-import { Filter, Inbox, Laptop, Plane, PiggyBank, Briefcase, Archive, Trash2, MailOpen } from "lucide-react"
+import { Filter, Inbox, Laptop, Plane, PiggyBank, Briefcase, Archive, Trash2, MailOpen, Dog } from "lucide-react"
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 
@@ -81,16 +82,40 @@ function useEmails(filters?: { starred?: boolean; read?: boolean; categoryId?: s
     preview: email.preview || "",
     date: email.createdAt ? formatEmailDate(new Date(email.createdAt)) : "",
     read: email.read,
-    category: Object.keys(email.categories || {}).find(key => email.categories?.[key]) || "work",
+    categories: email.categories,
     avatar: "/placeholder.svg?height=40&width=40",
   }));
 
   return { emails: formattedEmails, isLoading, error };
 }
 
+// Custom hook to fetch user categories
+function useCategories() {
+  const [categories, setCategories] = useState<Array<{ id: string; name: string, icon: string }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const categoriesQuery = api.email.getCategories.useQuery();
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (categoriesQuery.isSuccess) {
+      setCategories(categoriesQuery.data);
+      setIsLoading(false);
+    } else if (categoriesQuery.isError) {
+      console.error("Error fetching categories:", categoriesQuery.error);
+      setError("Failed to load categories");
+      setIsLoading(false);
+    }
+  }, [categoriesQuery.isSuccess, categoriesQuery.isError, categoriesQuery.data, categoriesQuery.error]);
+
+  return { categories, isLoading, error };
+}
+
 export default function EmailInbox() {
   // Use the custom hook to fetch emails
   const { emails: emailList, isLoading, error } = useEmails();
+  const { categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
   const [activeCategory, setActiveCategory] = useState("all")
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
 
@@ -135,13 +160,13 @@ export default function EmailInbox() {
         <div className="flex flex-1 overflow-hidden">
           <aside className="w-48 border-r p-3 hidden md:block">
             <div className="flex items-center gap-2 mb-4 px-2">
-              <Inbox className="h-5 w-5" />
-              <h1 className="text-lg font-bold">Inbox</h1>
+              <Dog className="h-5 w-5" />
+              <h1 className="text-lg font-bold">Chompymail</h1>
             </div>
             <div className="space-y-1">
               <Button
                 variant={activeCategory === "all" ? "secondary" : "ghost"}
-                className="w-full justify-start"
+                className="w-full justify-start cursor-pointer"
                 onClick={() => setActiveCategory("all")}
               >
                 <Inbox className="mr-2 h-4 w-4" />
@@ -150,39 +175,21 @@ export default function EmailInbox() {
                   {unreadCount}
                 </Badge>
               </Button>
-              <Button
-                variant={activeCategory === "ai" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setActiveCategory("ai")}
-              >
-                <Laptop className="mr-2 h-4 w-4" />
-                AI
-                <Badge className="ml-auto" variant="secondary">
-                  {aiCount}
-                </Badge>
-              </Button>
-              <Button
-                variant={activeCategory === "finance" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setActiveCategory("finance")}
-              >
-                <PiggyBank className="mr-2 h-4 w-4" />
-                Finance
-                <Badge className="ml-auto" variant="secondary">
-                  {financeCount}
-                </Badge>
-              </Button>
-              <Button
-                variant={activeCategory === "travel" ? "secondary" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setActiveCategory("travel")}
-              >
-                <Plane className="mr-2 h-4 w-4" />
-                Travel
-                <Badge className="ml-auto" variant="secondary">
-                  {travelCount}
-                </Badge>
-              </Button>
+              {categories.map(category => (
+                <Button
+                  key={category.id}
+                  variant={activeCategory === category.id ? "secondary" : "ghost"}
+                  className="w-full justify-start cursor-pointer"
+                  onClick={() => setActiveCategory(category.id)}
+                >
+                  <DynamicIcon name={category.icon} className="mr-2 h-4 w-4" color="black" />
+                  {category.name}
+                  <Badge className="ml-auto" variant="secondary">
+                    ?
+                    {/* {emailList.filter(email => email.category === category.id).length} */}
+                  </Badge>
+                </Button>
+              ))}
             </div>
           </aside>
 
@@ -245,6 +252,7 @@ export default function EmailInbox() {
                 <EmailItem
                   key={email.id}
                   email={email}
+                  categories={categories}
                   isSelected={selectedEmails.includes(email.id)}
                   onSelect={toggleEmailSelection}
                 />
@@ -266,16 +274,16 @@ interface EmailItemProps {
     preview: string
     date: string
     read: boolean
-    category: string
+    categories: string[]
     avatar: string
   }
   isSelected: boolean
   onSelect: (id: string) => void
 }
 
-function EmailItem({ email, isSelected, onSelect }: EmailItemProps) {
-  const CategoryIcon = categoryIcons[email.category as keyof typeof categoryIcons]
+function EmailItem({ email, isSelected, onSelect, categories }: EmailItemProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const emailCategories = categories.filter(category => email.categories.includes(category.id));
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent event from bubbling up
@@ -311,18 +319,20 @@ function EmailItem({ email, isSelected, onSelect }: EmailItemProps) {
           <div className="flex items-center justify-between mb-0.5">
             <div className="font-semibold truncate max-w-[180px] sm:max-w-xs flex items-center">
               {email.sender}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="ml-2 p-1 rounded-full hover:bg-accent/50 transition-colors">
-                      <CategoryIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="capitalize">{email.category}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {emailCategories.map(category => (
+                <TooltipProvider key={category.id}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="ml-2 p-1 rounded-full hover:bg-accent/50 transition-colors">
+                        <DynamicIcon name={category.icon} className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="capitalize">{category.name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
             </div>
             <div className="text-xs text-muted-foreground whitespace-nowrap ml-2">
               {email.date}
