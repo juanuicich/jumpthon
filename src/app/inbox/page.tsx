@@ -7,6 +7,7 @@ import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Inbox, Dog } from "lucide-react"
 import { RemoveCategoryDialog } from "~/components/ui/remove-category-dialog";
+import { CategorySwitcher } from "~/components/ui/category_switcher";
 import { EmailItem } from '~/components/ui/email_item';
 import { useEmails } from '~/components/hooks/use_emails';
 import { useCategories } from '~/components/hooks/use_categories';
@@ -16,6 +17,7 @@ export default function EmailInbox() {
   // Use the custom hook to fetch emails
   const { emails, isLoading, error } = useEmails();
   const categories = useCategories();
+  const [selectedCategory, setSelectedCategory] = useState<{ id: string; name: string } | null>(null)
   const [activeCategory, setActiveCategory] = useState("all")
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
 
@@ -137,6 +139,14 @@ export default function EmailInbox() {
               <Inbox className="mr-2 h-4 w-4" />
               <span className='max-w-32 truncate'>Uncategorized</span>
             </Button>
+            <CategorySwitcher
+              onSelect={(category) => {
+                setSelectedCategory(category)
+                console.log("Selected category:", category)
+              }}
+              categories={categories}
+              modalTitle="Select category"
+            />
             <div className="mt-4 w-full px-2 text-left">
               <Button variant="outline" size="sm" onClick={() => handleBatchAction('read')} className="cursor-pointer">
                 <DynamicIcon name="plus" className="h-4 w-4 mr-2" />

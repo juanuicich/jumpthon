@@ -47,10 +47,10 @@ export type Database = {
           [x: string]: any // to bring relations
           color: string | null
           created_at: string
-          description: string | null
+          description: string
           icon: string | null
           id: string
-          name: string | null
+          name: string
           updated_at: string | null
           user_id: string
         }
