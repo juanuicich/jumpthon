@@ -181,12 +181,12 @@ export default function EmailInbox() {
                 >
                   <DynamicIcon name={(category.icon || "email") as any} className={`mr-2 h-4 w-4 stroke-slate-800`} />
                   <div className="w-full flex"><span className='max-w-32 truncate'>{category.name}</span></div>
-                  <Badge
+                  {false && <Badge
                     className="w-8 h-6 cursor-pointer group-hover:hidden"
                     variant="secondary"
                   >
                     {category?.email[0].count as any}
-                  </Badge>
+                  </Badge>}
                 </Button>
               ))}
               <Button

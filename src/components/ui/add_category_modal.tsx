@@ -70,6 +70,7 @@ export function AddCategoryModal({ onSubmit, edit, category }: CategoryModalProp
   }
 
   const onOpenChange = () => {
+    setFormData(emptyState);
     setOpen(!open);
   }
 
