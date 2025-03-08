@@ -8,7 +8,7 @@ import { Card } from "~/components/ui/card"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip"
-import { Filter, Inbox, Laptop, Plane, PiggyBank, Briefcase, Archive, Trash2, MailOpen, Dog } from "lucide-react"
+import { Filter, Inbox, Archive, Trash2, MailOpen, Dog } from "lucide-react"
 import { useEffect, useState } from "react";
 import { createClient } from "~/lib/supabase/client";
 
@@ -80,7 +80,7 @@ function useCategories() {
         });
     }
 
-    const channel = supabase.channel("realtime emails").on("postgres_changes", {
+    const channel = supabase.channel("realtime categories").on("postgres_changes", {
       event: "*",
       schema: "public",
       table: "category",
