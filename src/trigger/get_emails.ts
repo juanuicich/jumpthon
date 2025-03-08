@@ -61,7 +61,6 @@ export const getEmailTask = task({
       const dbEmail: Email = {
         subject: summarized.subject,
         preview: summarized.summary,
-        read: false,
         starred: false,
         gmail_id: email.id,
         sender: sender.name,
