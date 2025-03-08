@@ -7,14 +7,15 @@ export function useEmails(filters?: { starred?: boolean; read?: boolean; categor
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const categoryId = filters?.categoryId || null;
 
   useEffect(() => {
     function fetchEmails() {
       console.log("Fetching emails with filters:", filters);
       let query = supabase.from("email").select("*").order("created_at", { ascending: false });
 
-      if (filters?.categoryId) {
-        query = query.eq("category_id", filters.categoryId);
+      if (categoryId) {
+        query = query.eq("category_id", categoryId);
       }
 
       query.then(({ data, error }) => {
@@ -44,7 +45,7 @@ export function useEmails(filters?: { starred?: boolean; read?: boolean; categor
     return () => {
       supabase.removeChannel(channel);
     }
-  }, [supabase, setEmails, setIsLoading, filters?.categoryId]);
+  }, [supabase, setEmails, setIsLoading, categoryId]);
 
   return { emails, isLoading, error };
 }
