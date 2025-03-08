@@ -1,133 +1,71 @@
 import "server-only";
-import { eq, sql, and } from "drizzle-orm";
-import { db } from "~/server/db";
-import { accounts, categories, emails } from "./schema";
 
-export async function getUserEmails() {
-  const session = {};
+import { createClient } from "@supabase/supabase-js";
 
-  if (!session?.user?.id) {
-    throw new Error("User not authenticated");
-  }
-
-  const userAccounts = await getUserAccounts()
-  const accountIds = userAccounts.map(account => account.id);
-  const userEmails = await getEmailsByAcccount(accountIds);
-
-  return userEmails;
+function getClient() {
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-export async function getUserAccounts(userId?: string) {
-  let queryById: string;
-  if (!userId) {
-    const session = {};
+export async function getAccountById(accountId: string) {
+  const supabase = getClient();
+  const { data: account, error } = await supabase
+    .from('account')
+    .select('*')
+    .eq('identity_id', accountId)
+    .single() as { data: Account | null, error: any };
 
-    if (!session?.user?.id) {
-      throw new Error("User not authenticated");
-    }
-
-    queryById = session.user.id;
-  } else {
-    queryById = userId;
+  if (error || !account) {
+    console.error('Error querying account schema:', { error, account });
+    return;
   }
-
-  const userAccounts = await db.query.accounts.findMany({
-    where: eq(accounts.userId, queryById),
-    orderBy: (accounts, { asc }) => [asc(accounts.provider)],
-  });
-
-  return userAccounts;
-}
-
-export async function getEmailsByAcccount(accountIds: string[]) {
-  const userEmails = await db.query.emails.findMany({
-    where: accountIds.length === 1
-      ? eq(emails.ownedById, accountIds[0])
-      : sql`${emails.ownedById} IN ${accountIds}`,
-    orderBy: (emails, { desc }) => [desc(emails.createdAt)],
-  });
-
-  return userEmails;
-}
-
-export async function getUserEmailsWithFilters({
-  starred,
-  read,
-  categoryId
-}: {
-  starred?: boolean;
-  read?: boolean;
-  categoryId?: string;
-} = {}) {
-  const session = {};
-
-  if (!session?.user?.id) {
-    throw new Error("User not authenticated");
-  }
-
-  const conditions = [eq(emails.ownedById, session.user.id)];
-
-  if (starred !== undefined) {
-    conditions.push(eq(emails.starred, starred));
-  }
-  if (read !== undefined) {
-    conditions.push(eq(emails.read, read));
-  }
-  if (categoryId) {
-    conditions.push(sql`${emails.categories} @> ${{ [categoryId]: true }}::jsonb`);
-  }
-
-  let query = db.select().from(emails).where(and(...conditions));
-
-  return query.orderBy(emails.createdAt);
-}
-
-export async function getAccountById(id: string) {
-  const account = await db.query.accounts.findFirst({
-    where: eq(accounts.id, id),
-    with: {
-      user: true,
-    }
-  });
 
   return account;
 }
 
-export async function getUserCategories(userId?: string) {
-  let user_id;
-  if (!userId) {
-    const session = {};
+export async function getEmailsByAcccount(accountIds: string[]) {
+  const supabase = getClient();
 
-    if (!session?.user?.id) {
-      throw new Error("User not authenticated");
-    }
+  const { data: emails, error } = await supabase
+    .from('email')
+    .select('*')
+    .in('identity_id', accountIds)
+    .order('created_at', { ascending: false }) as { data: Email[] | null, error: any };
 
-    user_id = session.user.id;
-  } else {
-    user_id = userId;
+  if (error || !emails) {
+    console.error('Error querying emails schema:', { error, emails });
+    return;
   }
 
-  const userCategories = await db.query.categories.findMany({
-    where: eq(categories.ownedById, user_id),
-    orderBy: (categories, { asc }) => [asc(categories.name)],
-  });
-
-  return userCategories;
+  return emails;
 }
 
-export async function saveEmail(emailData: Omit<typeof emails.$inferInsert, "id" | "createdAt" | "updatedAt">) {
-  const result = await db.insert(emails)
-    .values(emailData)
-    .returning();
+export async function getUserCategories(userId: string) {
+  const supabase = getClient();
 
-  return result.length > 0 ? result[0] : null;
+  const { data: categories, error } = await supabase
+    .from('category')
+    .select('*')
+    .eq('user_id', userId) as { data: Category[] | null, error: any };
+
+  if (error || !categories) {
+    console.error('Error querying categories schema:', { error, categories });
+    return;
+  }
+
+  return categories;
 }
 
-export async function updateAccountTokens(accountId: string, accessToken: string, refreshToken: string) {
-  const result = await db.update(accounts)
-    .set({ access_token: accessToken, refresh_token: refreshToken })
-    .where(eq(accounts.id, accountId))
-    .returning({ updatedId: accounts.id });
+export async function insertEmails(emails: Email[]) {
+  const supabase = getClient();
 
-  return result.length > 0 ? result[0] : null;
+  const { data, error } = await supabase
+    .from('email')
+    .insert(emails);
+
+  if (error) {
+    console.error('Error inserting emails:', error);
+    return;
+  }
+
+  return data;
 }
