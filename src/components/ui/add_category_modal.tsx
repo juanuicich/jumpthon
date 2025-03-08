@@ -30,14 +30,16 @@ export interface CategoryFormData {
 }
 
 export function AddCategoryModal({ onSubmit }: CategoryModalProps) {
-  const [open, setOpen] = useState(true);
-
-  const [formData, setFormData] = useState<CategoryFormData>({
+  const emptyState = {
     category_name: "",
     category_description: "",
     category_icon: "dog",
     recategorize: false,
-  })
+  };
+
+  const [open, setOpen] = useState(false);
+
+  const [formData, setFormData] = useState<CategoryFormData>(emptyState)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -49,8 +51,9 @@ export function AddCategoryModal({ onSubmit }: CategoryModalProps) {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit?.(formData)
+    e.preventDefault();
+    onSubmit?.(formData);
+    setFormData(emptyState);
     setOpen(false);
   }
 

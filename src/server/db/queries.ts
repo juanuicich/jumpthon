@@ -62,14 +62,12 @@ export async function getUserCategories(userId: string): Promise<Category[]> {
   return categories || [];
 }
 
-
-
-export async function insertEmails(emails: Partial<Email>[]) {
+export async function upsertEmails(emails: Partial<Email>[]) {
   const supabase = getClient();
 
   const { data, error } = await supabase
     .from('email')
-    .insert(emails);
+    .upsert(emails, { onConflict: "gmail_id,identity_id" });
 
   if (error) {
     console.error('Error inserting emails:', error);

@@ -47,8 +47,30 @@ export default function EmailInbox() {
     fetchEmails();
   }, []);
 
+  async function addCategory(category: CategoryFormData) {
+    // Post the category data to the API /api/add-category
+    try {
+      const response = await fetch('/api/add-category', {
+        method: 'POST',
+        body: JSON.stringify(category),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add category');
+      }
+    } catch (error) {
+      console.error('Error creating category:', error);
+    }
+  }
+
   const handleAddCategory = (data: CategoryFormData) => {
     console.log("Category data:", data)
+    addCategory(data);
+
   }
 
   const toggleEmailSelection = (id: string) => {

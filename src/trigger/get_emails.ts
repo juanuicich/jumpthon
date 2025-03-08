@@ -2,14 +2,14 @@ import { logger, task } from "@trigger.dev/sdk/v3";
 import { classifyEmail } from "~/lib/gemini";
 import { fetchGmailEmail, fetchGmailInbox, getGmailClient } from "~/lib/gmail";
 import { parseEmailSender } from "~/lib/utils"
-import { getEmailsByAcccount, getUserCategories, insertEmails } from "~/server/db/queries";
+import { getEmailsByAcccount, getUserCategories, upsertEmails } from "~/server/db/queries";
 
 // Get a single email from a user's Gmail inbox and process it
 export const getEmailTask = task({
   id: "get-email",
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
   queue: {
-    concurrencyLimit: 10,
+    concurrencyLimit: 2,
   },
   retry: {
     maxAttempts: 1
@@ -80,7 +80,7 @@ export const getEmailTask = task({
 
       logger.log("Saving email", dbEmail);
 
-      await insertEmails([dbEmail]);
+      await upsertEmails([dbEmail]);
 
       return summarized;
     } catch (error) {
