@@ -17,11 +17,10 @@ import { useKeyboardShortcuts } from '~/components/hooks/use_keyboard_shortcuts'
 
 export default function EmailInbox() {
   // Use the custom hook to fetch emails
-  const { emails, isLoading, error } = useEmails();
-  const categories = useCategories();
-  const [selectedCategory, setSelectedCategory] = useState<{ id: string; name: string } | null>(null)
-  const [activeCategory, setActiveCategory] = useState("all")
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
+  const categories = useCategories();
+  const { emails, isLoading, error } = useEmails({ categoryId: selectedCategory });
 
   // Function to trigger email fetching task
   const fetchEmails = async () => {
@@ -48,8 +47,6 @@ export default function EmailInbox() {
   }, []);
 
   const unreadCount = emails.length
-  const filteredEmails =
-    activeCategory === "all" ? emails : [];
 
   const toggleEmailSelection = (id: string) => {
     setSelectedEmails(prev =>
@@ -128,9 +125,9 @@ export default function EmailInbox() {
             </div>
             <div className="space-y-1 h-full">
               <Button
-                variant={activeCategory === "all" ? "secondary" : "ghost"}
+                variant={selectedCategory === "all" ? "outline" : "ghost"}
                 className="w-full justify-start cursor-pointer"
-                onClick={() => setActiveCategory("all")}
+                onClick={() => setSelectedCategory(null)}
               >
                 <Inbox className="mr-2 h-4 w-4" />
                 All Mail
@@ -141,9 +138,9 @@ export default function EmailInbox() {
               {categories.map(category => (
                 <Button
                   key={category.id}
-                  variant={activeCategory === category.id ? "secondary" : "ghost"}
+                  variant={selectedCategory === category.id ? "outline" : "ghost"}
                   className="w-full cursor-pointer flex justify-between"
-                  onClick={() => setActiveCategory(category.id)}
+                  onClick={() => setSelectedCategory(category.id)}
                 >
                   <DynamicIcon name={(category.icon || "email") as any} className={`mr-2 h-4 w-4 stroke-slate-800`} />
                   <div className="w-full flex"><span className='max-w-32 truncate'>{category.name}</span></div>
@@ -156,16 +153,16 @@ export default function EmailInbox() {
                 </Button>
               ))}
               <Button
-                variant={activeCategory === "none" ? "secondary" : "ghost"}
+                variant={selectedCategory === "none" ? "secondary" : "ghost"}
                 className="w-full justify-start cursor-pointer"
-                onClick={() => setActiveCategory("none")}
+                onClick={() => setSelectedCategory("none")}
               >
                 <Inbox className="mr-2 h-4 w-4" />
                 <span className='max-w-32 truncate'>Uncategorized</span>
               </Button>
               <CategorySwitcher
                 onSelect={(category) => {
-                  setSelectedCategory(category)
+                  setSelectedCategory(category.id)
                   console.log("Selected category:", category)
                 }}
                 categories={categories}
@@ -191,10 +188,10 @@ export default function EmailInbox() {
           <div className="sticky top-0 z-10 p-3 border-b backdrop-blur-md bg-white/90 dark:bg-black/50 flex justify-between w-full">
             <div className="flex items-center gap-2 h-12">
               <Checkbox
-                checked={selectedEmails.length === filteredEmails.length}
+                checked={selectedEmails.length === emails.length}
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    setSelectedEmails(filteredEmails.map(email => email.id));
+                    setSelectedEmails(emails.map(email => email.id));
                   } else {
                     setSelectedEmails([]);
                   }
@@ -215,12 +212,12 @@ export default function EmailInbox() {
             <div className="text-sm text-muted-foreground pr-4 my-auto">
               {selectedEmails.length > 0
                 ? `${selectedEmails.length} selected`
-                : `${filteredEmails.length} messages`}
+                : `${emails.length} messages`}
             </div>
           </div>
 
           <div className="divide-y w-full">
-            {filteredEmails.map((email) => (
+            {emails.map((email) => (
               <EmailItem
                 key={email.id}
                 email={email}
