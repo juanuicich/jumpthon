@@ -1,12 +1,12 @@
 "use client"
 
+import { useEffect, useState } from "react";
 import { DynamicIcon } from 'lucide-react/dynamic';
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { Filter, Inbox, Archive, Trash2, MailOpen, Dog } from "lucide-react"
-import { useEffect, useState } from "react";
+import { Inbox, Dog } from "lucide-react"
+import { RemoveCategoryDialog } from "~/components/ui/remove-category-dialog";
 import { EmailItem } from '~/components/ui/email_item';
 import { useEmails } from '~/components/hooks/use_emails';
 import { useCategories } from '~/components/hooks/use_categories';
@@ -19,7 +19,7 @@ export default function EmailInbox() {
   const [activeCategory, setActiveCategory] = useState("all")
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
 
-  // Function to trigger email fetching
+  // Function to trigger email fetching task
   const fetchEmails = async () => {
     try {
       const response = await fetch('/api/fetch-emails', {
@@ -33,9 +33,6 @@ export default function EmailInbox() {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch emails');
       }
-
-      const result = await response.json();
-      console.log('Email fetch triggered:', result);
     } catch (error) {
       console.error('Error triggering email fetch:', error);
     }
@@ -46,12 +43,7 @@ export default function EmailInbox() {
     fetchEmails();
   }, []);
 
-  // Show loading state or error if needed
-  // if (isLoading) return <div className="flex justify-center p-4">Loading emails...</div>;
-  if (error) return <div className="text-red-500 p-4">{error}</div>;
-
   const unreadCount = emails.length
-
   const filteredEmails =
     activeCategory === "all" ? emails : [];
 
@@ -77,9 +69,31 @@ export default function EmailInbox() {
     console.log(`Updating emails with action: ${action}`, { updatedEmails });
     setSelectedEmails([])
   }
+  const [categoryToRemove, setCategoryToRemove] = useState<Category | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  const handleRemoveCategory = (category: Category) => {
+    if (category) {
+      setCategoryToRemove(category);
+      setIsConfirmOpen(true);
+    }
+  };
+
+  const handleConfirmRemove = (categoryId: string, shouldRecategorize: boolean) => {
+    console.log(`Removing category: ${categoryId}`, { recategorize: shouldRecategorize });
+    // Add your category removal logic here
+  };
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">
+      {categoryToRemove && (
+        <RemoveCategoryDialog
+          category={categoryToRemove}
+          onConfirm={handleConfirmRemove}
+          open={isConfirmOpen}
+          onOpenChange={setIsConfirmOpen}
+        />
+      )}
       <div className="flex flex-1 overflow-hidden max-w-7xl mx-auto">
         <aside className="w-56 p-3 hidden md:block h-screen">
           <div className="flex items-center gap-2 mb-4 px-2">
@@ -102,12 +116,15 @@ export default function EmailInbox() {
               <Button
                 key={category.id}
                 variant={activeCategory === category.id ? "secondary" : "ghost"}
-                className={`w-full justify-start cursor-pointer`}
+                className="w-full cursor-pointer flex justify-between"
                 onClick={() => setActiveCategory(category.id)}
               >
                 <DynamicIcon name={(category.icon || "email") as any} className={`mr-2 h-4 w-4 stroke-slate-800`} />
-                <span className='max-w-32 truncate'>{category.name}</span>
-                <Badge className="ml-auto" variant="secondary">
+                <div className="w-full flex"><span className='max-w-32 truncate'>{category.name}</span></div>
+                <Badge
+                  className="w-8 h-6 cursor-pointer group-hover:hidden"
+                  variant="secondary"
+                >
                   {category?.email[0].count as any}
                 </Badge>
               </Button>
@@ -143,38 +160,16 @@ export default function EmailInbox() {
                 }}
                 className="h-9 w-9 mr-2 rounded-full cursor-pointer"
               />
-              {selectedEmails.length > 0 ? (
-                <>
-                  <Button variant="outline" size="sm" onClick={() => handleBatchAction('read')}>
-                    <MailOpen className="h-4 w-4 mr-2" />
-                    Mark as Read
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleBatchAction('archive')}>
-                    <Archive className="h-4 w-4 mr-2" />
-                    Archive
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleBatchAction('delete')}>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Select defaultValue="newest">
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">Newest first</SelectItem>
-                      <SelectItem value="oldest">Oldest first</SelectItem>
-                      <SelectItem value="unread">Unread first</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
+
+              <Button variant="outline" disabled={selectedEmails.length == 0} size="sm" onClick={() => handleBatchAction('delete')} className="cursor-pointer">
+                <DynamicIcon name="trash-2" className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+              <Button variant="outline" disabled={selectedEmails.length == 0} size="sm" onClick={() => handleBatchAction('read')} className="cursor-pointer" title="Use AI agent to unsubscribe">
+                <DynamicIcon name="bot" className="h-4 w-4 mr-2" />
+                Delete & unsub
+              </Button>
+
             </div>
             <div className="text-sm text-muted-foreground pr-4 my-auto">
               {selectedEmails.length > 0
@@ -197,8 +192,8 @@ export default function EmailInbox() {
         </main>
 
         <aside className="w-32 h-screen"></aside>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
 
