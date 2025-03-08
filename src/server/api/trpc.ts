@@ -11,8 +11,6 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { db } from "~/server/db";
-
 /**
  * 1. CONTEXT
  *
@@ -29,7 +27,6 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = {};
 
   return {
-    db,
     session,
     ...opts,
   };
