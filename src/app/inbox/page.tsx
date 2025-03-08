@@ -1,104 +1,16 @@
 "use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { DynamicIcon } from 'lucide-react/dynamic';
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
-import { Card } from "~/components/ui/card"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip"
 import { Filter, Inbox, Archive, Trash2, MailOpen, Dog } from "lucide-react"
 import { useEffect, useState } from "react";
-import { createClient } from "~/lib/supabase/client";
+import { EmailItem } from '~/components/ui/email_item';
+import { useEmails } from '~/components/hooks/use_emails';
+import { useCategories } from '~/components/hooks/use_categories';
 
-
-// Custom hook to fetch emails with optional filters
-function useEmails(filters?: { starred?: boolean; read?: boolean; categoryId?: string }) {
-  const [emails, setEmails] = useState<Email[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
-
-  useEffect(() => {
-    function fetchEmails() {
-      supabase
-        .from("email")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("Error fetching emails:", error);
-          } else {
-            console.log("Emails fetched:", data);
-            setEmails(data);
-            setIsLoading(false);
-          }
-        });
-    }
-
-    const channel = supabase.channel("realtime emails").on("postgres_changes", {
-      event: "*",
-      schema: "public",
-      table: "email",
-    }, (payload) => {
-      console.log(payload);
-      fetchEmails();
-    }).subscribe();
-
-    fetchEmails();
-
-    // Clear the channel when the component unmounts
-    return () => {
-      supabase.removeChannel(channel);
-    }
-  }, [supabase, setEmails, setIsLoading]);
-
-  return { emails, isLoading, error };
-}
-
-// Custom hook to fetch user categories
-function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  const supabase = createClient();
-
-  useEffect(() => {
-
-    function fetchCategories() {
-      supabase
-        .from("category")
-        .select("*, email(count)")
-        .order("name", { ascending: true })
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("Error fetching categories:", error);
-          } else {
-            console.log("Categories fetched:", data);
-            setCategories(data);
-          }
-        });
-    }
-
-    const channel = supabase.channel("realtime categories").on("postgres_changes", {
-      event: "*",
-      schema: "public",
-      table: "category",
-    }, (payload) => {
-      console.log("Category update", payload);
-      fetchCategories();
-    }).subscribe();
-
-    fetchCategories();
-
-    // Clear the channel when the component unmounts
-    return () => {
-      supabase.removeChannel(channel);
-    }
-  }, [supabase, setCategories]);
-
-  return categories;
-}
 
 export default function EmailInbox() {
   // Use the custom hook to fetch emails
@@ -257,7 +169,7 @@ export default function EmailInbox() {
             </div>
           </div>
 
-          <div className="divide-y">
+          <div className="divide-y w-full">
             {filteredEmails.map((email) => (
               <EmailItem
                 key={email.id}
@@ -273,74 +185,6 @@ export default function EmailInbox() {
         <aside className="w-32 h-screen"></aside>
       </div>
     </div>
-  )
-}
-
-function EmailItem({ email, isSelected, onSelect, categories }: { email: Email; isSelected: boolean; onSelect: (id: string) => void; categories: Category[] }) {
-  const [isHovered, setIsHovered] = useState(false)
-  let emailCategories: Category[] = [];
-
-  const handleSelectClick = (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent event from bubbling up
-    onSelect(email.id)
-  }
-
-  return (
-    <Card
-      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary/10' : ''}`}
-    >
-      <div className="flex items-start gap-3">
-        <div
-          className="relative cursor-pointer"
-          onClick={handleSelectClick}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          {isSelected || isHovered ? (
-            <Checkbox
-              checked={isSelected}
-              className="h-9 w-9 rounded-full cursor-pointer"
-            />
-          ) : (
-            <Avatar className="h-9 w-9 shrink-0">
-              <AvatarFallback>{email.sender ? email.sender.substring(0, 1).toUpperCase() : ""}</AvatarFallback>
-            </Avatar>
-          )}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-0.5">
-            <div className="font-semibold text-base truncate max-w-[180px] sm:max-w-xs flex items-center mr-2">
-              {email.sender}
-              {emailCategories.map(category => (
-                <TooltipProvider key={category.id}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="p-1 rounded-full hover:bg-accent/50 transition-colors">
-                        {/* @ts-ignore */}
-                        <DynamicIcon name={category.icon} className="h-4 w-4 text-muted-foreground stroke-2" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{category.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ))}
-            </div>
-            <div className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-              {email.created_at}
-            </div>
-          </div>
-
-          <div className="text-sm">
-            <span className="font-semibold">{email.subject}</span>
-            {" "}
-            <span className="text-muted-foreground">{email.preview}</span>
-          </div>
-        </div>
-      </div>
-    </Card>
   )
 }
 

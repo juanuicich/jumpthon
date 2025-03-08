@@ -77,9 +77,6 @@ export async function getGmailClient(accountId: string) {
     forceRefreshOnFailure: true
   };
 
-  console.log('Account', { account });
-  console.log('ClientOptions', { options });
-
   const authClient = new OAuth2Client(options);
 
   authClient.setCredentials({
