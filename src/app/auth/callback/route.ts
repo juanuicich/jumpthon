@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       const jwt = jwtDecode(session?.access_token);
       const identity = identities.find(i => i.identity_data.provider_id == jwt.user_metadata.provider_id);
 
-      await supabase.from('account').update({ refresh_token: session?.provider_refresh_token }).eq('identity_id', identity?.identity_id).select();
+      await supabase.from('account').update({ refresh_token: session?.provider_refresh_token, access_token: session?.provider_token }).eq('identity_id', identity?.identity_id).select();
 
       const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === 'development'
