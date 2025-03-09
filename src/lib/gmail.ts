@@ -58,6 +58,31 @@ export async function fetchGmailEmail(
 }
 
 /**
+ * Deletes a Gmail message by moving it to trash
+ * @param auth Authenticated OAuth2Client
+ * @param messageId ID of the message to delete
+ * @returns Operation result
+ */
+export async function deleteGmailEmail(
+  auth: OAuth2Client,
+  messageId: string
+): Promise<gmail_v1.Schema$Message> {
+  const gmail = google.gmail({ version: 'v1', auth, errorRedactor: false });
+
+  try {
+    const response = await gmail.users.messages.trash({
+      userId: 'me',
+      id: messageId,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting Gmail message ${messageId}:`, error);
+    throw error;
+  }
+}
+
+/**
  * Gets an authenticated OAuth2Client for a Google account
  * Refreshes the token if it's about to expire (within 10 minutes)
  * @param accountId The account ID in the database

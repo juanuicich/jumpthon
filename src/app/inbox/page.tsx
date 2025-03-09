@@ -12,7 +12,7 @@ import { AddCategoryModal } from "~/components/ui/add_category_modal";
 import { RemoveCategoryModal } from "~/components/ui/remove_category_modal";
 import { useEmails } from '~/components/hooks/use_emails';
 import { useCategories } from '~/components/hooks/use_categories';
-
+import { DeleteEmail } from "~/components/ui/delete_email";
 
 export default function EmailInbox() {
   // Use the custom hook to fetch emails
@@ -60,23 +60,6 @@ export default function EmailInbox() {
     setSelectedEmails(prev =>
       prev.includes(id) ? prev.filter(emailId => emailId !== id) : [...prev, id]
     )
-  }
-
-  const handleBatchAction = (action: 'read' | 'archive' | 'delete') => {
-    let updatedEmails = [...emails]
-    switch (action) {
-      case 'read':
-        updatedEmails = updatedEmails.map(email =>
-          selectedEmails.includes(email.id) ? { ...email, read: true } : email
-        )
-        break
-      case 'archive':
-      case 'delete':
-        updatedEmails = updatedEmails.filter(email => !selectedEmails.includes(email.id))
-        break
-    }
-    console.log(`Updating emails with action: ${action}`, { updatedEmails });
-    setSelectedEmails([])
   }
 
   return (
@@ -145,14 +128,8 @@ export default function EmailInbox() {
 
               {selectedEmails.length > 0 &&
                 <>
-                  <Button variant="outline" disabled={selectedEmails.length == 0} size="sm" onClick={() => handleBatchAction('delete')} className="cursor-pointer">
-                    <DynamicIcon name="trash-2" className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                  <Button variant="outline" disabled={selectedEmails.length == 0} size="sm" onClick={() => handleBatchAction('read')} className="cursor-pointer" title="Use AI agent to unsubscribe">
-                    <DynamicIcon name="bot" className="h-4 w-4 mr-2" />
-                    Delete & unsub
-                  </Button>
+                  <DeleteEmail emails={selectedEmails} />
+                  <DeleteEmail emails={selectedEmails} unsub={true} />
                 </>}
               {selectedEmails.length === 0 && activeCategory &&
                 <div className="flex items-center gap-2">

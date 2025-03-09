@@ -41,7 +41,7 @@ export function RemoveCategoryModal({ category }: RemoveCategoryModalProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" disabled={category == null} className="cursor-pointer">
+        <Button variant="outline" disabled={category == null} size="sm" className="cursor-pointer">
           <DynamicIcon name="trash-2" className="h-4 w-4" />
           Delete Category
         </Button>

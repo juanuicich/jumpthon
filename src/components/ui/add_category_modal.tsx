@@ -96,7 +96,7 @@ export function AddCategoryModal({ edit, category }: CategoryModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">
+        <Button variant="outline" className="cursor-pointer" size="sm">
           {edit ? <DynamicIcon name="edit-2" className="h-4 w-4" /> : <DynamicIcon name="plus" className="h-4 w-4" />}
           {edit ? "Edit" : "Add New"}  Category
         </Button>

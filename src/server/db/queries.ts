@@ -76,3 +76,19 @@ export async function upsertEmails(emails: Partial<Email>[]) {
 
   return data;
 }
+
+export async function deleteEmails(emailIds: string[]) {
+  const supabase = getClient();
+
+  const { data, error } = await supabase
+    .from('email')
+    .delete()
+    .in('id', emailIds);
+
+  if (error) {
+    console.error('Error deleting emails', error);
+    return;
+  }
+
+  return data;
+}

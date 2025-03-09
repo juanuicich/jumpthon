@@ -3,7 +3,7 @@ import { createClient } from "~/lib/supabase/client";
 
 // Custom hook to fetch emails with optional filters
 export function useEmails(filters?: { starred?: boolean; read?: boolean; categoryId?: string | null }) {
-  const [emails, setEmails] = useState<Email[]>([]);
+  const [emails, setEmails] = useState<EmailSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
@@ -12,7 +12,7 @@ export function useEmails(filters?: { starred?: boolean; read?: boolean; categor
   useEffect(() => {
     function fetchEmails() {
       console.log("Fetching emails with category:", categoryId);
-      let query = supabase.from("email").select("*").order("created_at", { ascending: false });
+      let query = supabase.from("email").select("id,sender,subject,preview,created_at,category_id").order("created_at", { ascending: false });
 
       if (categoryId) {
         query = query.eq("category_id", categoryId);

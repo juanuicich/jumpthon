@@ -19,6 +19,11 @@ interface LLMResponse {
   unsub_link: string;
 }
 
+interface LLMCheck {
+  status: "OK" | "error";
+  message: string;
+}
+
 export async function classifyEmail(user: User, email: Email, categories: Category[]): Promise<LLMResponse> {
   console.log("Classifying email", user, email);
   const prompt = `Subject: ${email.subject}
@@ -44,6 +49,22 @@ The user's name is ${user.name} and their email address is ${user.email}`,
 ${categoryNames}`),
       unsub_link: z.string().describe("should include the raw URL of the link to unsubscribe from these emails, if available")
     }),
+  });
+
+
+  return result.object;
+}
+
+export async function checkUnsub(response: string): Promise<LLMCheck> {
+
+  const result = await generateObject({
+    model: google("gemini-2.0-flash-lite-preview-02-05"),
+    system: `Your job is to analyze the response from an AI and tell me if the task was completed successfully or not. The AI has attempted to unsubscribe from an email. You need to read the response and determine if the AI was successful in unsubscribing from the email. Respond by generating the correct JSON response`,
+    prompt: response,
+    schema: z.object({
+      status: z.enum(["OK", "error"]).describe("The status of the task. If the task was successful, respond with OK. If there was an error, respond with error. If the task was successful, the AI has successfully unsubscribed from the email. If there was an error, the AI was not able to unsubscribe from the email."),
+      message: z.string().describe("Describe the reason for your decision. If the task was successful, you can respond with a simple message like 'Unsubscribed successfully'. If there was an error, you should describe the error message in detail.")
+    })
   });
 
 
