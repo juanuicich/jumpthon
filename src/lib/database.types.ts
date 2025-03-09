@@ -11,13 +11,13 @@ export type Database = {
     Tables: {
       account: {
         Row: {
-          access_token: string | null
           email: string | null
           id: string
           identity_id: string
           name: string | null
-          picture_url: string | null
-          refresh_token: string | null
+          picture_url: string | null,
+          access_token: string | null,
+          refresh_token: string | null,
           user_id: string | null
         }
         Insert: {

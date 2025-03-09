@@ -22,6 +22,7 @@ Check LICENSE file.
 - [x] user can choose to unsubscribe from an email
   - [x] use AI agent to follow unsubscribe link and make sure it unsubbed
 - [x] actions can be triggered on multiple emails at once
+- [ ] setup cron job to fetch incoming emails
 
 ## dev notes
 

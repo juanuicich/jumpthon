@@ -5,5 +5,5 @@ declare global {
   type Category = DB["public"]["Tables"]["category"]["Row"];
   type Email = DB["public"]["Tables"]["email"]["Row"];
   type EmailSummary = Omit<Email, "content", "identity_id", "to", "from", "unsub_link", "user_id", "updated_at">;
-  type Account = DB["public"]["Tables"]["account"]["Row"];
+  type Account = Omit<DB["public"]["Tables"]["account"]["Row"], "refresh_token", "access_token", "user_id", "id">;
 }

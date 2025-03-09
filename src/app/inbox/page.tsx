@@ -10,9 +10,11 @@ import { EmailItem } from '~/components/ui/email_item';
 import { Icon } from "~/components/ui/icon";
 import { AddCategoryModal } from "~/components/ui/add_category_modal";
 import { RemoveCategoryModal } from "~/components/ui/remove_category_modal";
-import { useEmails } from '~/components/hooks/use_emails';
+import { useAccounts } from '~/components/hooks/use_accounts';
 import { useCategories } from '~/components/hooks/use_categories';
+import { useEmails } from '~/components/hooks/use_emails';
 import { DeleteEmail } from "~/components/ui/delete_email";
+import ProfileDropdown from "~/components/ui/profile_dropdown";
 
 export default function EmailInbox() {
   // Use the custom hook to fetch emails
@@ -20,6 +22,7 @@ export default function EmailInbox() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
   const categories = useCategories();
+  const [accounts, activeAccount, setActiveAccount] = useAccounts();
   const { emails, isLoading, error } = useEmails({ categoryId: selectedCategory });
 
   useEffect(() => {
@@ -71,6 +74,7 @@ export default function EmailInbox() {
               <Dog className="h-5 w-5 stroke-amber-600" />
               <h1 className="text-lg font-bold">Chompymail</h1>
             </div>
+            <ProfileDropdown profiles={accounts || []} currentProfile={activeAccount} setActiveAccount={setActiveAccount} />
             <div className="space-y-1 h-full">
               <Button
                 variant={selectedCategory === "all" ? "outline" : "ghost"}
@@ -161,7 +165,7 @@ export default function EmailInbox() {
           </div>
         </main>
 
-        <aside className="w-32 h-screen"></aside>
+        <aside className="w-32 h-screen hidden xl:block"></aside>
       </div >
     </div >
   )

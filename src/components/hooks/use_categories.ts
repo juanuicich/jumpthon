@@ -12,13 +12,12 @@ export function useCategories() {
     function fetchCategories() {
       supabase
         .from("category")
-        .select("*, email(count)")
+        .select("*")
         .order("name", { ascending: true })
         .then(({ data, error }) => {
           if (error) {
             console.error("Error fetching categories:", error);
           } else {
-            console.log("Categories fetched:", data);
             setCategories(data);
           }
         });

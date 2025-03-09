@@ -25,3 +25,10 @@ export function parseEmailSender(fromHeader: string): { name: string; email: str
 
   return { name, email };
 }
+
+// Get initials for avatar fallback
+export const getInitial = (name: string) => {
+  if (!name) return "";
+  const cleaned = name.replace(/[^a-zA-Z0-9]/g, "");
+  return cleaned.length > 0 ? cleaned.charAt(0).toUpperCase() : "";
+}
