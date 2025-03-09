@@ -1,9 +1,7 @@
 "use client"
 
-import { useCallback, useEffect } from "react";
-import debounce from "lodash.debounce";
+import { useEffect } from "react";
 import { DynamicIcon } from 'lucide-react/dynamic';
-import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Inbox, Dog } from "lucide-react"
@@ -24,14 +22,6 @@ export default function EmailInbox() {
   const { categories, activeCategory, setActiveCategory } = useCategoryStore();
   const { activeAccount } = useAccountStore();
 
-  // Debounce filter updates
-  const debouncedSetFilters = useCallback(
-    debounce((filters) => {
-      setFilters(filters);
-    }, 50), // 300ms delay
-    [setFilters]
-  );
-
   // Initialize stores and subscriptions
   useEffect(() => {
     const cleanup = initializeStores();
@@ -40,9 +30,8 @@ export default function EmailInbox() {
 
   // Update filters when category or account changes
   useEffect(() => {
-    console.log("Updating filters", { activeCategory, activeAccount });
-    debouncedSetFilters({ category: activeCategory, account: activeAccount });
-  }, [activeCategory, activeAccount, debouncedSetFilters]);
+    setFilters({ category: activeCategory, account: activeAccount });
+  }, [activeCategory, activeAccount]);
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">

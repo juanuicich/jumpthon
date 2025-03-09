@@ -12,10 +12,14 @@ export function EmailList() {
     toggleEmailSelection(id);
   };
 
-  // Get container width for responsive list width
+  // Get container width and height for responsive list dimensions
   const [listWidth, setListWidth] = useState(() =>
     listRef.current?.clientWidth || 0
   );
+  const [listHeight, setListHeight] = useState(() =>
+    window?.innerHeight || 0
+  );
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -25,7 +29,9 @@ export function EmailList() {
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
+    if (typeof window !== "undefined") {
+      window.addEventListener('resize', handleResize);
+    }
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 

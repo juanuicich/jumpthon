@@ -15,7 +15,9 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
     e.stopPropagation() // Prevent event from bubbling up
     const account = accounts.find(a => a.identity_id === email.identity_id);
     const url = `https://mail.google.com/mail?authuser=${account.email}#all/${email.gmail_id}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (typeof window !== "undefined") {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
     console.log("Opening email:", email.id)
   }
 
