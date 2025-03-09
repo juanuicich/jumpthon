@@ -33,8 +33,8 @@ export function initializeStores() {
     .on("postgres_changes", {
       event: "*",
       schema: "public",
-      table: "identity",
-    }, () => {
+      table: "account",
+    }, (payload) => {
       useAccountStore.getState().fetchAccounts();
     })
     .subscribe();
