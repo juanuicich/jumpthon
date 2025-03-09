@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+// import { chromium } from 'playwright';
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { deleteGmailEmail, getGmailClient } from "~/lib/gmail";
 import { checkUnsub } from "~/lib/gemini";
@@ -101,50 +101,50 @@ export const unsubDeleteEmailTask = task({
 
       const { id: browserSessionId } = await createBrowserSession(browserConfiguration);
       logger.info("Browser session created", { browserSessionId });
-      const browser = await chromium.connectOverCDP(
-        `wss://connect.anchorbrowser.io?apiKey=${process.env.ANCHOR_BROWSER_KEY}&sessionId=${browserSessionId}`
-      );
-      const context = browser.contexts()[0];
-      if (!context) {
-        throw new Error("No context found");
-      }
-      const ai = context.serviceWorkers()[0];
-      if (!ai) {
-        throw new Error("No AI found");
-      }
-      const page = context.pages()[0];
-      if (!page) {
-        throw new Error("No page found");
-      }
-      await page.goto(payload.unsub_link);
-      const result = await ai.evaluate(`"You must unsubscribe me from this email I received. Fill any forms necessary to make sure I am completely unsubscribed from ALL emails from this sender. Check to select the right options if necessary. DO NOT UNDER ANY CIRCUMSTANCES subscribe me to anything. DO NOT resusbcribe me to anything. If the page says I am already unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
+      //       const browser = await chromium.connectOverCDP(
+      //         `wss://connect.anchorbrowser.io?apiKey=${process.env.ANCHOR_BROWSER_KEY}&sessionId=${browserSessionId}`
+      //       );
+      //       const context = browser.contexts()[0];
+      //       if (!context) {
+      //         throw new Error("No context found");
+      //       }
+      //       const ai = context.serviceWorkers()[0];
+      //       if (!ai) {
+      //         throw new Error("No AI found");
+      //       }
+      //       const page = context.pages()[0];
+      //       if (!page) {
+      //         throw new Error("No page found");
+      //       }
+      //       await page.goto(payload.unsub_link);
+      //       const result = await ai.evaluate(`"You must unsubscribe me from this email I received. Fill any forms necessary to make sure I am completely unsubscribed from ALL emails from this sender. Check to select the right options if necessary. DO NOT UNDER ANY CIRCUMSTANCES subscribe me to anything. DO NOT resusbcribe me to anything. If the page says I am already unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
 
-Read the page carefully. First try to unsubscribe by clicking the form. Do not enter any email addresses. It should be prefilled already.
+      // Read the page carefully. First try to unsubscribe by clicking the form. Do not enter any email addresses. It should be prefilled already.
 
-Have you read the page and tried clicking unsubscribe?
+      // Have you read the page and tried clicking unsubscribe?
 
-If that didn't work and the form requires you to enter my email address and it isn't prefilled in the form already, you can use the address: ${payload.to}
+      // If that didn't work and the form requires you to enter my email address and it isn't prefilled in the form already, you can use the address: ${payload.to}
 
-Once you confirm I am unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
+      // Once you confirm I am unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
 
-If successful, respond with just OK. If there was an error, respond with a JSON object with a key error and the message."`);
+      // If successful, respond with just OK. If there was an error, respond with a JSON object with a key error and the message."`);
 
-      await browser.close();
-      await stopBrowserSession(browserSessionId);
+      //       await browser.close();
+      //       await stopBrowserSession(browserSessionId);
 
-      logger.info("Unsub response", { result });
+      //       logger.info("Unsub response", { result });
 
-      const check = await checkUnsub(JSON.stringify(result));
+      //       const check = await checkUnsub(JSON.stringify(result));
 
-      logger.info("Unsub check", { check });
+      //       logger.info("Unsub check", { check });
 
-      if (check.status === "error") {
-        logger.error("Failed to unsubscribe", { check });
-        throw new Error("Failed to unsubscribe");
-      }
+      //       if (check.status === "error") {
+      //         logger.error("Failed to unsubscribe", { check });
+      //         throw new Error("Failed to unsubscribe");
+      //       }
 
-      const deleted = await deleteEmailTask.trigger(payload);
-      return { browserSessionId, result, check };
+      //       const deleted = await deleteEmailTask.trigger(payload);
+      //       return { browserSessionId, result, check };
 
     } catch (error) {
       logger.error("Error unsubscribing from email", { error }); throw error;
