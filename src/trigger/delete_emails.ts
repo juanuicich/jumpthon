@@ -1,4 +1,3 @@
-import { chromium } from 'playwright-core';
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { deleteGmailEmail, getGmailClient } from "~/lib/gmail";
 import { checkUnsub } from "~/lib/gemini";
@@ -101,23 +100,12 @@ export const unsubDeleteEmailTask = task({
 
       const { id: browserSessionId } = await createBrowserSession(browserConfiguration);
       logger.info("Browser session created", { browserSessionId });
-      const browser = await chromium.connectOverCDP(
-        `wss://connect.anchorbrowser.io?apiKey=${process.env.ANCHOR_BROWSER_KEY}&sessionId=${browserSessionId}`
-      );
-      const context = browser.contexts()[0];
-      if (!context) {
-        throw new Error("No context found");
-      }
-      const ai = context.serviceWorkers()[0];
-      if (!ai) {
-        throw new Error("No AI found");
-      }
-      const page = context.pages()[0];
-      if (!page) {
-        throw new Error("No page found");
-      }
-      await page.goto(payload.unsub_link);
-      const result = await ai.evaluate(`"You must unsubscribe me from this email I received. Fill any forms necessary to make sure I am completely unsubscribed from ALL emails from this sender. Check to select the right options if necessary. DO NOT UNDER ANY CIRCUMSTANCES subscribe me to anything. DO NOT resusbcribe me to anything. If the page says I am already unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
+
+      const options = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: payload.unsub_link, task: `"You must unsubscribe me from this email I received. Fill any forms necessary to make sure I am completely unsubscribed from ALL emails from this sender. Check to select the right options if necessary. DO NOT UNDER ANY CIRCUMSTANCES subscribe me to anything. DO NOT resusbcribe me to anything. If the page says I am already unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
 
       Read the page carefully. First try to unsubscribe by clicking the form. Do not enter any email addresses. It should be prefilled already.
 
@@ -127,9 +115,11 @@ export const unsubDeleteEmailTask = task({
 
       Once you confirm I am unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
 
-      If successful, respond with just OK. If there was an error, respond with a JSON object with a key error and the message."`);
+      If successful, respond with just OK. If there was an error, respond with a JSON object with a key error and the message."`})
+      };
 
-      await browser.close();
+      const result = await fetch(`https://connect.anchorbrowser.io/tools/perform-web-task?apiKey=${process.env.ANCHOR_BROWSER_KEY}`, options);
+
       await stopBrowserSession(browserSessionId);
 
       logger.info("Unsub response", { result });
