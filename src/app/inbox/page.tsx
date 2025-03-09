@@ -22,8 +22,18 @@ export default function EmailInbox() {
   const { categories, activeCategory, setActiveCategory } = useCategoryStore();
   const { activeAccount } = useAccountStore();
 
-  // Initialize stores and subscriptions
+  // Trigger email fetch
+  async function fetchEmails() {
+    const response = await fetch("/api/fetch-emails", {
+      method: "POST",
+    });
+    const data = await response.json();
+  }
+
   useEffect(() => {
+    fetchEmails();
+
+    // Initialize stores and subscriptions
     const cleanup = initializeStores();
     return cleanup;
   }, []);
