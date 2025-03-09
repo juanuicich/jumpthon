@@ -1,9 +1,10 @@
+import { useAccountStore } from "~/components/stores/account_store";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 
-
-export function EmailItem({ email, isSelected, onSelect, accounts }: { email: Email; isSelected: boolean; onSelect: (id: string) => void, accounts: Account[] }) {
+export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSelected: boolean; onSelect: (id: string) => void }) {
+  const { accounts } = useAccountStore();
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent event from bubbling up
@@ -20,7 +21,7 @@ export function EmailItem({ email, isSelected, onSelect, accounts }: { email: Em
 
   return (
     <Card
-      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary/10' : ''}`
+      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer h-24 ${isSelected ? 'bg-primary/10' : ''}`
       }
     >
       <div className="flex items-start gap-3" onClick={(e) => handleOpenClick(e)}>

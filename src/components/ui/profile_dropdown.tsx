@@ -3,7 +3,7 @@
 import type React from "react"
 import { X, UserPlus } from "lucide-react"
 import { createClient } from "~/lib/supabase/client";
-import { cn, getInitial } from "~/lib/utils";
+import { getInitial } from "~/lib/utils";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -16,45 +16,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { useEffect } from "react";
 import { oAuthOptions } from "~/lib/utils";
 import { useAccountStore } from "~/components/stores/account_store";
 
-interface ProfileDropdownProps {
-  currentProfile: Account | null
-  profiles?: Account[],
-  setActiveAccount: (account: Account | null) => void
-  className?: string,
-}
 
 export default function ProfileDropdown() {
-  // const { currentProfile, profiles, setActiveAccount, className } = useAccountStore();
-  const { accounts: profiles, activeAccount, setActiveAccount } = useAccountStore();
+  const { accounts, activeAccount, setActiveAccount } = useAccountStore();
 
-  // Use provided props or defaults
-  // const profilesData = profiles
-  const currentProfileData = activeAccount
-
-  // useEffect(() => {
-  //   // If accounts change and the current account is not in the list, set the first account as active
-  //   if (!profilesData.find((profile) => profile.identity_id === currentProfileData?.identity_id)) {
-  //     setActiveAccount(profilesData[0])
-  //   }
-  // }, [profilesData])
-
-  // Handle profile deletion (just a placeholder)
   const handleSelectProfile = (profile: Account, e: React.MouseEvent) => {
     setActiveAccount(profile);
     e.stopPropagation()
   }
 
-  // Handle profile deletion (just a placeholder)
   const handleDeleteProfile = (profile: Account, e: React.MouseEvent) => {
     e.stopPropagation()
     unlinkIdentity(profile);
   }
 
-  // Handle profile deletion (just a placeholder)
   const handleConnectProfile = (e: React.MouseEvent) => {
     e.stopPropagation();
     linkIdentity();
@@ -96,15 +74,15 @@ export default function ProfileDropdown() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className={cn("flex items-center justify-start p-2 mb-2 h-12 min-w-[120px] max-w-full cursor-pointer", className)}
+          className="flex items-center justify-start p-2 mb-2 h-12 min-w-[120px] max-w-full cursor-pointer"
         >
           <Avatar className="h-6 w-6 mr-1">
-            <AvatarImage src={currentProfileData?.picture_url!} alt={currentProfileData?.name!} />
-            <AvatarFallback>{getInitial(currentProfileData?.name!)}</AvatarFallback>
+            <AvatarImage src={activeAccount?.picture_url!} alt={activeAccount?.name!} />
+            <AvatarFallback>{getInitial(activeAccount?.name!)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start overflow-hidden truncate">
-            <div className="text-sm font-medium truncate">{currentProfileData?.name}</div>
-            <div className="text-xs text-muted-foreground truncate">{currentProfileData?.email}</div>
+            <div className="text-sm font-medium truncate">{activeAccount?.name}</div>
+            <div className="text-xs text-muted-foreground truncate">{activeAccount?.email}</div>
           </div>
         </Button>
       </DropdownMenuTrigger>
@@ -114,26 +92,26 @@ export default function ProfileDropdown() {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          {profiles.map((profile) => (
-            <DropdownMenuItem key={profile.identity_id} className="py-2 cursor-pointer" onClick={(e) => handleSelectProfile(profile, e)}>
+          {accounts.map((account) => (
+            <DropdownMenuItem key={account.identity_id} className="py-2 cursor-pointer" onClick={(e) => handleSelectProfile(account, e)}>
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center">
                   <Avatar className="h-8 w-8 mr-2">
-                    <AvatarImage src={profile.picture_url!} alt={profile.name!} />
-                    <AvatarFallback>{getInitial(profile.name || "")}</AvatarFallback>
+                    <AvatarImage src={account.picture_url!} alt={account.name!} />
+                    <AvatarFallback>{getInitial(account.name || "")}</AvatarFallback>
                   </Avatar>
                   <div className="overflow-hidden max-w-36">
-                    <p className="text-sm font-medium truncate">{profile.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{profile.email}</p>
+                    <p className="text-sm font-medium truncate">{account.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{account.email}</p>
                   </div>
                 </div>
-                {profile.identity_id !== 'all' && <Button
+                {account.identity_id !== 'all' && <Button
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                  onClick={(e) => handleDeleteProfile(profile, e)}
-                  title={`Remove ${profile.name}'s account`}
-                  aria-label={`Remove ${profile.name}'s account`}
+                  onClick={(e) => handleDeleteProfile(account, e)}
+                  title={`Remove ${account.name}'s account`}
+                  aria-label={`Remove ${account.name}'s account`}
                 >
                   <X className="h-4 w-4" />
                 </Button>}
@@ -148,7 +126,7 @@ export default function ProfileDropdown() {
           <span>Connect new account</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
+    </DropdownMenu >
   )
 }
 

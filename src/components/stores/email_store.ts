@@ -81,7 +81,7 @@ export const useEmailStore = create<EmailState>((set, get) => ({
     return new Promise<void>((resolve) => {
       const debouncedFetch = debounce(() => {
         get().fetchEmailsDirect().then(resolve);
-      }, 300);
+      }, 50);
       debouncedFetch();
     });
   },
