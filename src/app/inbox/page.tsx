@@ -18,7 +18,7 @@ import { EmailList } from "~/components/ui/email_list";
 
 export default function EmailInbox() {
   // Get state and actions from stores
-  const { emails, selectedEmails, setFilters, isLoading: emailsLoading } = useEmailStore();
+  const { emails, selectedEmails, setFilters, isLoading: emailsLoading, selectAllEmails, clearSelectedEmails } = useEmailStore();
   const { categories, activeCategory, setActiveCategory } = useCategoryStore();
   const { activeAccount } = useAccountStore();
 
@@ -98,9 +98,9 @@ export default function EmailInbox() {
                 checked={selectedEmails.length === emails.length && selectedEmails.length > 0}
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    // setSelectedEmails(emails.map(email => email.id));
+                    selectAllEmails();
                   } else {
-                    // setSelectedEmails([]);
+                    clearSelectedEmails();
                   }
                 }}
                 className="h-9 w-9 mr-2 rounded-full cursor-pointer"
