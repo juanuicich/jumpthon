@@ -21,7 +21,6 @@ import { ideahub } from "googleapis/build/src/apis/ideahub"
 import { DynamicIcon } from "lucide-react/dynamic"
 
 interface CategoryModalProps {
-  onSubmit?: (data: CategoryFormData) => void,
   edit?: boolean,
   category?: Category
 }
@@ -34,8 +33,7 @@ export interface CategoryFormData {
   id?: string
 }
 
-export function AddCategoryModal({ onSubmit, edit, category }: CategoryModalProps) {
-  console.log("AddCategoryModal", category);
+export function AddCategoryModal({ edit, category }: CategoryModalProps) {
   const emptyState = {
     category_name: category?.name || "",
     category_description: category?.description || "",
@@ -57,9 +55,29 @@ export function AddCategoryModal({ onSubmit, edit, category }: CategoryModalProp
     setFormData((prev) => ({ ...prev, category_icon: iconName }))
   }
 
+  async function upsertCategory(category: CategoryFormData) {
+    // Post the category data to the API /api/add-category
+    try {
+      const response = await fetch('/api/category', {
+        method: 'POST',
+        body: JSON.stringify(category),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add category');
+      }
+    } catch (error) {
+      console.error('Error creating category:', error);
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.(formData);
+    upsertCategory(formData);
     setFormData(emptyState);
     setOpen(false);
   }

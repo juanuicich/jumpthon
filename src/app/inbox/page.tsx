@@ -8,13 +8,11 @@ import { Checkbox } from "~/components/ui/checkbox"
 import { Inbox, Dog } from "lucide-react"
 import { CategorySwitcher } from "~/components/ui/category_switcher";
 import { EmailItem } from '~/components/ui/email_item';
-import { KeyboardShortcutsModal } from '~/components/ui/keyboard_shortcuts_modal';
 import { Icon } from "~/components/ui/icon";
 import { AddCategoryModal, CategoryFormData } from "~/components/ui/add_category_modal";
 import { RemoveCategoryModal } from "~/components/ui/remove_category_modal";
 import { useEmails } from '~/components/hooks/use_emails';
 import { useCategories } from '~/components/hooks/use_categories';
-import { useKeyboardShortcuts } from '~/components/hooks/use_keyboard_shortcuts';
 
 
 export default function EmailInbox() {
@@ -60,31 +58,6 @@ export default function EmailInbox() {
     fetchEmails();
   }, []);
 
-  async function upsertCategory(category: CategoryFormData) {
-    // Post the category data to the API /api/add-category
-    try {
-      const response = await fetch('/api/category', {
-        method: 'POST',
-        body: JSON.stringify(category),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add category');
-      }
-    } catch (error) {
-      console.error('Error creating category:', error);
-    }
-  }
-
-  const handleAddCategory = (data: CategoryFormData) => {
-    console.log("Category data:", data)
-    upsertCategory(data);
-  }
-
   const toggleEmailSelection = (id: string) => {
     setSelectedEmails(prev =>
       prev.includes(id) ? prev.filter(emailId => emailId !== id) : [...prev, id]
@@ -107,30 +80,6 @@ export default function EmailInbox() {
     console.log(`Updating emails with action: ${action}`, { updatedEmails });
     setSelectedEmails([])
   }
-
-  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
-
-  // Define handlers for keyboard shortcuts
-  const handlers = {
-    previousEmail: () => { },
-    nextEmail: () => { },
-    selectEmail: () => { },
-    selectAllEmails: () => { },
-    openEmail: () => { },
-    unsubscribeEmail: () => { },
-    deleteEmail: () => { },
-    selectCategory: () => {
-      setOpenCategorySwitcher(true);
-    },
-    selectAccount: () => { },
-    openModal: () => {
-      console.log("Opening keyboard shortcuts modal");
-      setShowKeyboardShortcuts(true);
-    },
-  }
-
-  const { shortcuts } = useKeyboardShortcuts(handlers);
-  console.log({ shortcuts });
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">
@@ -184,14 +133,8 @@ export default function EmailInbox() {
                 modalTitle="Select category"
               />
               <div className="mt-4 w-full px-2 text-left">
-                <AddCategoryModal onSubmit={handleAddCategory} />
+                <AddCategoryModal />
               </div>
-            </div>
-            <div className="px-2">
-              <Button variant="outline" onClick={() => setShowKeyboardShortcuts(true)} className="flex items-center gap-2 cursor-pointer">
-                <DynamicIcon name="help-circle" className="h-4 w-4" />
-              </Button>
-
             </div>
           </div>
         </aside>
@@ -226,7 +169,7 @@ export default function EmailInbox() {
                 <div className="flex items-center gap-2">
                   <Icon name={activeCategory?.icon} className="h-6 w-6 mr-2" />
                   <div className="text-lg mr-4">{activeCategory?.name}</div>
-                  <AddCategoryModal onSubmit={handleAddCategory} edit={true} category={activeCategory} />
+                  <AddCategoryModal edit={true} category={activeCategory} />
                   <RemoveCategoryModal category={activeCategory} />
                 </div>
               }
@@ -254,7 +197,6 @@ export default function EmailInbox() {
 
         <aside className="w-32 h-screen"></aside>
       </div >
-      <KeyboardShortcutsModal isOpen={showKeyboardShortcuts} onClose={() => setShowKeyboardShortcuts(false)} shortcuts={shortcuts} />
     </div >
   )
 }
