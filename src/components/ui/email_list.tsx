@@ -1,4 +1,3 @@
-'use client';
 import { useEmailStore } from '~/components/stores/email_store';
 import { EmailItem } from '~/components/ui/email_item';
 import { FixedSizeList as List } from 'react-window';
@@ -14,14 +13,14 @@ export function EmailList() {
   };
 
   // Get container width and height for responsive list dimensions
-  const [listWidth, setListWidth] = useState(window?.innerWidth || 800);
-  const [listHeight, setListHeight] = useState(window?.innerHeight || 600);
+  const [listWidth, setListWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 800);
+  const [listHeight, setListHeight] = useState(typeof window !== 'undefined' ? window.innerHeight : 600);
 
   useEffect(() => {
     const handleResize = () => {
       if (listRef.current) {
         setListWidth(listRef.current.clientWidth);
-        setListHeight(window.innerHeight - listRef.current.getBoundingClientRect().top);
+        setListHeight((typeof window !== 'undefined' ? window.innerHeight : 600) - listRef.current.getBoundingClientRect().top);
       }
     };
 
