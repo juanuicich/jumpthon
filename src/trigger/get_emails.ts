@@ -16,13 +16,11 @@ export const getEmailTask = task({
   },
   machine: "small-2x",
   run: async (payload: { accountId: string, gmailId: string }, { ctx }) => {
-    logger.log("Getting email for account", payload);
 
     try {
       // Fetch email from Gmail using the account's access token
       const { authClient, user } = await getGmailClient(payload.accountId);
 
-      logger.log("Authenticated client", user);
 
       const email = await fetchGmailEmail(authClient, payload.gmailId);
 
@@ -108,10 +106,8 @@ export const getAllGmailEmailsTask = task({
       // Check which emails aren't in the DB
       // Get user's emails from the DB to check which ones we already have
       const userEmails = await getEmailsByAcccount([payload.accountId]) || [];
-      logger.log("User emails", { emails: userEmails });
 
       const existingGmailIds = new Set(userEmails.map(email => email.gmail_id));
-      logger.log("Existing Gmail IDs", { existingGmailIds });
 
       // Filter out emails that already exist in our database
       const newEmails = emails.filter(email => email.id && !existingGmailIds.has(email.id)).map(email => ({
@@ -125,7 +121,6 @@ export const getAllGmailEmailsTask = task({
         // Enqueue tasks to fetch each individual email
         logger.log("Batching emails", { newEmails });
         const batchHandle = await getEmailTask.batchTrigger(newEmails)
-        logger.log("Successfully batched tasks", { batchId: batchHandle.batchId });
         return { batchId: batchHandle.batchId };
       }
 
