@@ -34,7 +34,7 @@ export function initializeStores() {
       event: "*",
       schema: "public",
       table: "account",
-    }, (payload) => {
+    }, () => {
       useAccountStore.getState().fetchAccounts();
     })
     .subscribe();
