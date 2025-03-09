@@ -2,6 +2,7 @@ import { useAccountStore } from "~/components/stores/account_store";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
+import { getInitial } from "~/lib/utils";
 
 export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSelected: boolean; onSelect: (id: string) => void }) {
   const { accounts } = useAccountStore();
@@ -36,7 +37,7 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
             className={`h-9 w-9 rounded-full cursor-pointer absolute bg-white ${isSelected ? 'block' : 'group-hover:block'}`}
           />
           <Avatar className={`h-9 w-9 shrink-0 ${isSelected ? 'hidden' : ' group-hover:hidden'}`}>
-            <AvatarFallback>{email.sender ? email.sender.substring(0, 1).toUpperCase() : ""}</AvatarFallback>
+            <AvatarFallback>{email.sender ? getInitial(email.sender) : ""}</AvatarFallback>
           </Avatar>
         </div>
 
