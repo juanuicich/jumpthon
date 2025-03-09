@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { unlink } from "fs";
+import { use, useEffect } from "react";
 
 interface ProfileDropdownProps {
   currentProfile: Account | null
@@ -36,6 +37,13 @@ export default function ProfileDropdown({ currentProfile, profiles = [], setActi
   // Use provided props or defaults
   const profilesData = profiles.length > 1 ? [allAccountsProfile, ...profiles] : profiles
   const currentProfileData = currentProfile || profilesData[0]
+
+  useEffect(() => {
+    // If accounts change and the current account is not in the list, set the first account as active
+    if (!profilesData.find((profile) => profile.identity_id === currentProfileData?.identity_id)) {
+      setActiveAccount(profilesData[0])
+    }
+  }, [profilesData])
 
   // Handle profile deletion (just a placeholder)
   const handleSelectProfile = (profile: Account, e: React.MouseEvent) => {
@@ -78,7 +86,8 @@ export default function ProfileDropdown({ currentProfile, profiles = [], setActi
     const selectedIdentity = identities.find((identity) => identity.identity_id === account.identity_id);
     if (selectedIdentity) {
       // unlink the  identity from the user
-      const { data, error } = await supabase.auth.unlinkIdentity(selectedIdentity)
+      const { data, error } = await supabase.auth.unlinkIdentity(selectedIdentity);
+      console.log({ data, error });
     }
   }
 
