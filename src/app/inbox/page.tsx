@@ -151,6 +151,7 @@ export default function EmailInbox() {
                 key={email.id}
                 email={email}
                 categories={categories}
+                accounts={accounts}
                 isSelected={selectedEmails.includes(email.id)}
                 onSelect={toggleEmailSelection}
               />

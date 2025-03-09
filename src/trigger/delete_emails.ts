@@ -18,7 +18,7 @@ export const deleteEmailTask = task({
   id: "delete-email",
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute
   queue: {
-    concurrencyLimit: 10,
+    concurrencyLimit: 20,
   },
   retry: {
     maxAttempts: 1
@@ -42,8 +42,6 @@ export const deleteEmailTask = task({
       } else {
         throw new Error("Failed to delete", deleted);
       }
-
-      return deleted;
     } catch (error) {
       logger.error("Error getting Gmail emails", { error });
       throw error;

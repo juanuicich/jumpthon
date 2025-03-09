@@ -5,7 +5,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Icon } from "~/components/ui/icon";
 import { useState } from "react";
 
-export function EmailItem({ email, isSelected, onSelect, categories }: { email: Email; isSelected: boolean; onSelect: (id: string) => void; categories: Category[] }) {
+export function EmailItem({ email, isSelected, onSelect, categories, accounts }: { email: Email; isSelected: boolean; onSelect: (id: string) => void; categories: Category[], accounts: Account[] }) {
   const [isHovered, setIsHovered] = useState(false)
   let category = categories.find(c => c.id === email.category_id);
 
@@ -14,11 +14,20 @@ export function EmailItem({ email, isSelected, onSelect, categories }: { email: 
     onSelect(email.id)
   }
 
+  const handleOpenClick = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent event from bubbling up
+    const account = accounts.find(a => a.identity_id === email.identity_id);
+    const url = `https://mail.google.com/mail?authuser=${account.email}#all/${email.gmail_id}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    console.log("Opening email:", email.id)
+  }
+
   return (
     <Card
-      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary/10' : ''}`}
+      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary/10' : ''}`
+      }
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3" onClick={(e) => handleOpenClick(e)}>
         <div
           className="relative cursor-pointer"
           onClick={handleSelectClick}

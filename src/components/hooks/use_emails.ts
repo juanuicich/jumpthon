@@ -20,7 +20,7 @@ export function useEmails(initialFilters?: EmailHookFilters) {
       const categoryId = filters?.category?.id || null;
       const accountId = filters?.account?.identity_id || null;
       console.log("Fetching emails with filters:", filters);
-      let query = supabase.from("email").select("id,sender,subject,preview,created_at,category_id").order("created_at", { ascending: false });
+      let query = supabase.from("email").select("id,sender,subject,preview,created_at,category_id,identity_id,gmail_id").order("created_at", { ascending: false });
 
       if (categoryId !== null) {
         query = query.eq("category_id", categoryId);
