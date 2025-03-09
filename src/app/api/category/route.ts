@@ -5,6 +5,64 @@ import { getEmailTask } from "~/trigger/get_emails";
 import { CategoryFormData } from "~/components/ui/add_category_modal";
 import { isNativeError } from "util/types";
 
+export async function DELETE(request: NextRequest) {
+  try {
+    // Get the authenticated user
+    const supabase = await createClient();
+    const { data: { user }, error: sessionError } = await supabase.auth.getUser();
+
+    if (sessionError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Get the category ID from the URL params
+    const searchParams = request.nextUrl.searchParams
+    const id = searchParams.get('id')
+
+    // Validate required fields
+    if (!id) {
+      return NextResponse.json(
+        { error: "Category ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Delete the category from the database
+    const { data, error } = await supabase
+      .from('category')
+      .delete()
+      .eq('id', id)
+      .single();
+    if (error) {
+      console.error("Error deleting category:", error);
+      return NextResponse.json(
+        { error: "Failed to delete category" },
+        { status: 500 }
+      );
+    } else if (!data) {
+      return NextResponse.json(
+        { error: "Category not found" },
+        { status: 404 }
+      );
+    } else {
+      return NextResponse.json(
+        "OK",
+        { status: 200 }
+      );
+    }
+
+  } catch (error: any) {
+    console.error("Error deleting category:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to delete category" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Get the authenticated user

@@ -44,7 +44,6 @@ export type Database = {
       }
       category: {
         Row: {
-          [x: string]: any // to bring relations
           color: string | null
           created_at: string
           description: string

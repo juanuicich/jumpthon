@@ -14,7 +14,7 @@ import {
 
 interface RemoveCategoryDialogProps {
   category: Category | null;
-  onConfirm: (categoryId: string, shouldRecategorize: boolean) => void;
+  onConfirm: (category: Category, shouldRecategorize: boolean) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -29,7 +29,7 @@ export function RemoveCategoryDialog({
 
   const handleConfirmRemove = () => {
     if (category) {
-      onConfirm(category.id, shouldRecategorize);
+      onConfirm(category, shouldRecategorize);
     }
     onOpenChange(false);
   };
@@ -38,7 +38,7 @@ export function RemoveCategoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Remove Category</DialogTitle>
+          <DialogTitle>Remove Category {category?.name}</DialogTitle>
           <DialogDescription>
             Are you sure you want to remove the {category?.name} category?
           </DialogDescription>

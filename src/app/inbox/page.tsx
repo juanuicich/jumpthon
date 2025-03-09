@@ -80,6 +80,22 @@ export default function EmailInbox() {
     }
   }
 
+  async function deleteCategory(category: Category, shouldRecategorize: boolean) {
+    // Post the category data to the API /api/add-category
+    try {
+      const response = await fetch(`/api/category?id=${category.id}&recat=${shouldRecategorize}`, {
+        method: 'DELETE',
+      });
+      console.log("Response:", response);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add category');
+      }
+    } catch (error) {
+      console.error('Error creating category:', error);
+    }
+  }
+
   const handleAddCategory = (data: CategoryFormData) => {
     console.log("Category data:", data)
     upsertCategory(data);
@@ -117,9 +133,9 @@ export default function EmailInbox() {
     }
   };
 
-  const handleConfirmRemove = (categoryId: string, shouldRecategorize: boolean) => {
-    console.log(`Removing category: ${categoryId}`, { recategorize: shouldRecategorize });
-    // Add your category removal logic here
+  const handleConfirmRemove = (category: Category, shouldRecategorize: boolean) => {
+    console.log(`Removing category`, { category, shouldRecategorize });
+    deleteCategory(category, shouldRecategorize);
   };
 
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
@@ -185,7 +201,6 @@ export default function EmailInbox() {
                     className="w-8 h-6 cursor-pointer group-hover:hidden"
                     variant="secondary"
                   >
-                    {category?.email[0].count as any}
                   </Badge>}
                 </Button>
               ))}
@@ -223,7 +238,7 @@ export default function EmailInbox() {
           <div className="sticky top-0 z-10 p-3 border-b backdrop-blur-md bg-white/90 dark:bg-black/50 flex justify-between w-full">
             <div className="flex items-center gap-2 h-12">
               <Checkbox
-                checked={selectedEmails.length === emails.length}
+                checked={selectedEmails.length === emails.length && selectedEmails.length > 0}
                 onCheckedChange={(checked) => {
                   if (checked) {
                     setSelectedEmails(emails.map(email => email.id));
