@@ -1,3 +1,4 @@
+'use client';
 import { useEmailStore } from '~/components/stores/email_store';
 import { EmailItem } from '~/components/ui/email_item';
 import { FixedSizeList as List } from 'react-window';
