@@ -31,7 +31,7 @@ export default function EmailInbox() {
   // Update filters when category or account changes
   useEffect(() => {
     setFilters({ category: activeCategory, account: activeAccount });
-  }, [activeCategory, activeAccount]);
+  }, [activeCategory, activeAccount, setFilters]);
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">

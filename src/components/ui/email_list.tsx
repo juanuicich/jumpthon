@@ -16,9 +16,13 @@ export function EmailList() {
   const [listWidth, setListWidth] = useState(() =>
     listRef.current?.clientWidth || 0
   );
-  const [listHeight, setListHeight] = useState(() =>
-    window?.innerHeight || 0
-  );
+
+  const [listHeight, setListHeight] = useState(() => {
+    if (typeof window !== "undefined") {
+      return Math.min(emails.length * ITEM_HEIGHT, window.innerHeight);
+    }
+    return 0;
+  });
 
 
   useEffect(() => {
@@ -30,9 +34,13 @@ export function EmailList() {
 
     handleResize();
     if (typeof window !== "undefined") {
-      window.addEventListener('resize', handleResize);
+      window?.addEventListener('resize', handleResize);
     }
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      if (typeof window !== "undefined") {
+        window?.removeEventListener('resize', handleResize)
+      }
+    };
   }, []);
 
   const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
@@ -52,7 +60,7 @@ export function EmailList() {
   return (
     <div className="w-full" ref={listRef}>
       <List
-        height={Math.min(emails.length * ITEM_HEIGHT, window.innerHeight)}
+        height={listHeight}
         width={listWidth || '100%'}
         itemCount={emails.length}
         itemSize={ITEM_HEIGHT}
