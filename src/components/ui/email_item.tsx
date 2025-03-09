@@ -28,14 +28,14 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
     >
       <div className="flex items-start gap-3" onClick={(e) => handleOpenClick(e)}>
         <div
-          className="relative cursor-pointer group"
+          className="relative cursor-pointer group w-9 h-9"
           onClick={handleSelectClick}
         >
           <Checkbox
             checked={isSelected}
-            className="h-9 w-9 rounded-full cursor-pointer absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            className={`h-9 w-9 rounded-full cursor-pointer absolute bg-white ${isSelected ? 'block' : 'group-hover:block'}`}
           />
-          <Avatar className="h-9 w-9 shrink-0 group-hover:opacity-0 transition-opacity">
+          <Avatar className={`h-9 w-9 shrink-0 ${isSelected ? 'hidden' : ' group-hover:hidden'}`}>
             <AvatarFallback>{email.sender ? email.sender.substring(0, 1).toUpperCase() : ""}</AvatarFallback>
           </Avatar>
         </div>
