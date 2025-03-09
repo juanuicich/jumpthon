@@ -89,23 +89,25 @@ export const unsubDeleteEmailTask = task({
   },
   run: async (payload: EmailTaskInput, { ctx }) => {
     try {
-      // Browser configuration settings
-      const browserConfiguration = {
-        adblock_config: { active: false },
-        captcha_config: { active: true },
-        proxy_config: { active: true },
-        recording: { active: true },
-        timeout: 2
-      };
 
-      const { id: browserSessionId } = await createBrowserSession(browserConfiguration);
-      logger.info("Browser session created", { browserSessionId });
+      if (payload.unsub_link) {
+        // Browser configuration settings
+        const browserConfiguration = {
+          adblock_config: { active: false },
+          captcha_config: { active: true },
+          proxy_config: { active: true },
+          recording: { active: true },
+          timeout: 2
+        };
 
-      const options = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: payload.unsub_link, task: `"You must unsubscribe me from this email I received. Fill any forms necessary to make sure I am completely unsubscribed from ALL emails from this sender. Check to select the right options if necessary. DO NOT UNDER ANY CIRCUMSTANCES subscribe me to anything. DO NOT resusbcribe me to anything. If the page says I am already unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
+        const { id: browserSessionId } = await createBrowserSession(browserConfiguration);
+        logger.info("Browser session created", { browserSessionId });
+
+        const options = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: payload.unsub_link, task: `"You must unsubscribe me from this email I received. Fill any forms necessary to make sure I am completely unsubscribed from ALL emails from this sender. Check to select the right options if necessary. DO NOT UNDER ANY CIRCUMSTANCES subscribe me to anything. DO NOT resusbcribe me to anything. If the page says I am already unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
 
       Read the page carefully. First try to unsubscribe by clicking the form. Do not enter any email addresses. It should be prefilled already.
 
@@ -116,25 +118,28 @@ export const unsubDeleteEmailTask = task({
       Once you confirm I am unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
 
       If successful, respond with just OK. If there was an error, respond with a JSON object with a key error and the message."`})
-      };
+        };
 
-      const result = await fetch(`https://connect.anchorbrowser.io/tools/perform-web-task?apiKey=${process.env.ANCHOR_BROWSER_KEY}`, options);
+        const result = await fetch(`https://connect.anchorbrowser.io/tools/perform-web-task?apiKey=${process.env.ANCHOR_BROWSER_KEY}`, options);
 
-      await stopBrowserSession(browserSessionId);
+        await stopBrowserSession(browserSessionId);
 
-      logger.info("Unsub response", { result });
+        logger.info("Unsub response", { result });
 
-      const check = await checkUnsub(JSON.stringify(result));
+        const check = await checkUnsub(JSON.stringify(result));
 
-      logger.info("Unsub check", { check });
+        logger.info("Unsub check", { check });
 
-      if (check.status === "error") {
-        logger.error("Failed to unsubscribe", { check });
-        throw new Error("Failed to unsubscribe");
+        if (check.status === "error") {
+          logger.error("Failed to unsubscribe", { check });
+          throw new Error("Failed to unsubscribe");
+        }
+        const deleted = await deleteEmailTask.trigger(payload);
+        return { browserSessionId, result, check };
+      } else {
+
+        const deleted = await deleteEmailTask.trigger(payload);
       }
-
-      const deleted = await deleteEmailTask.trigger(payload);
-      return { browserSessionId, result, check };
 
     } catch (error) {
       logger.error("Error unsubscribing from email", { error }); throw error;
