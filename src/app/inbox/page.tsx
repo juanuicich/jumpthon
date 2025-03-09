@@ -111,12 +111,15 @@ export default function EmailInbox() {
                 <DeleteEmail emails={selectedEmails} />
                 <DeleteEmail emails={selectedEmails} unsub={true} />
               </div>
-
               <div className={`${selectedEmails.length == 0 && activeCategory ? "flex" : "hidden"} items-center gap-2`}>
-                <Icon name={activeCategory?.icon || "dog"} className="h-6 w-6 mr-2" />
+                <Icon name={activeCategory?.icon || "dog"} className="h-6 w-6 ml-1" />
                 <div className="text-lg mr-4">{activeCategory?.name}</div>
                 <AddCategoryModal edit={true} category={activeCategory!} />
                 <RemoveCategoryModal category={activeCategory} />
+              </div>
+              <div className={`${selectedEmails.length == 0 && !activeCategory ? "flex" : "hidden"} items-center gap-2`}>
+                <DynamicIcon name="inbox" className="h-6 w-6 ml-1" />
+                <div className="text-lg mr-4">All Mail</div>
               </div>
 
 
