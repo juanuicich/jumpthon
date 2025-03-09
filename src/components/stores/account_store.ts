@@ -44,7 +44,7 @@ export const useAccountStore = create<AccountState>((set, get) => ({
           accounts: allAccounts,
           isLoading: false,
           // Set first account as active if none is selected
-          activeAccount: allAccounts.length > 0 && !get().activeAccount ? allAccounts[0] : get().activeAccount
+          activeAccount: allAccounts.length > 0 && (!get().activeAccount || !allAccounts.includes(get().activeAccount)) ? allAccounts[0] : get().activeAccount
         });
       }
     } catch (error) {
