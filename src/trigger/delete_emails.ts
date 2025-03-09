@@ -3,7 +3,6 @@ import { logger, task } from "@trigger.dev/sdk/v3";
 import { deleteGmailEmail, getGmailClient } from "~/lib/gmail";
 import { checkUnsub } from "~/lib/gemini";
 import { deleteEmails } from "~/server/db/queries";
-import { log } from 'console';
 
 export interface EmailTaskInput {
   id: string,
