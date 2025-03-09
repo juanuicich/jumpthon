@@ -4,8 +4,8 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Jumpthon project",
-  description: "For Jumpapp hackathon",
+  title: "Chompymail",
+  description: "Fetching your emails, chasing away spam",
   icons: [
     { rel: "icon", url: "/favicon.ico" },
     { rel: "icon", url: "/favicon.svg", type: "image/svg+xml" },

@@ -1,4 +1,5 @@
-# Jumpthon email agent
+# Chompymail email agent
+Build for the Jump weekend hackathon
 
 ## License
 Check LICENSE file.
