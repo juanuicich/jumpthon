@@ -16,8 +16,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { unlink } from "fs";
-import { use, useEffect } from "react";
+import { useEffect } from "react";
+import { oAuthOptions } from "~/lib/utils";
 
 interface ProfileDropdownProps {
   currentProfile: Account | null
@@ -65,7 +65,10 @@ export default function ProfileDropdown({ currentProfile, profiles = [], setActi
 
   async function linkIdentity() {
     const supabase = createClient();
-    const { data, error } = await supabase.auth.linkIdentity({ provider: 'google' })
+    const { data, error } = await supabase.auth.linkIdentity({
+      provider: 'google',
+      options: oAuthOptions(),
+    });
   }
 
   async function unlinkIdentity(account: Account) {
@@ -96,7 +99,7 @@ export default function ProfileDropdown({ currentProfile, profiles = [], setActi
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className={cn("flex items-center justify-start p-2 h-auto min-w-[120px] max-w-full cursor-pointer", className)}
+          className={cn("flex items-center justify-start p-2 mb-2 h-12 min-w-[120px] max-w-full cursor-pointer", className)}
         >
           <Avatar className="h-6 w-6 mr-1">
             <AvatarImage src={currentProfileData?.picture_url!} alt={currentProfileData?.name!} />

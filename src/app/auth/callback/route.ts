@@ -1,9 +1,11 @@
 import "server-only";
 import { NextResponse } from 'next/server'
-// The client you created from the Server-Side Auth instructions
 import { createClient } from '~/lib/supabase/server'
 import { jwtDecode } from "jwt-decode";
-
+import { schedules } from "@trigger.dev/sdk/v3";
+import { getAllGmailEmailsCron } from "~/trigger/get_emails";
+import { gmail_v1, google } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -19,12 +21,48 @@ export async function GET(request: Request) {
       const { data, error } = await supabase.auth.getSession();
       const { session } = data;
       const identities = session?.user.identities || [];
+      console.log({ session, identities });
       if (session?.access_token) {
         const jwt = jwtDecode(session.access_token) as { user_metadata?: { provider_id?: string } };
-        const identity = identities.find(i => i.identity_data?.provider_id == jwt.user_metadata?.provider_id);
+        console.log({ jwt });
 
-        await supabase.from('account').update({ refresh_token: session?.provider_refresh_token, access_token: session?.provider_token }).eq('identity_id', identity?.identity_id).select();
+        // get the Google identity for the new tokens
+        const options = {
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          redirectUri: process.env.GOOGLE_REDIRECT_URI,
+          forceRefreshOnFailure: true
+        };
+        console.log({ options });
+        const auth = new OAuth2Client(options);
 
+        auth.setCredentials({
+          access_token: session.provider_token,
+          refresh_token: session.provider_refresh_token,
+        });
+        const gmail = google.gmail({ version: 'v1', auth, errorRedactor: false });
+        const profile = await gmail.users.getProfile({ userId: 'me' });
+        console.log({ profile });
+        if (!profile.data.emailAddress) {
+          return NextResponse.json({ error: 'Authentication failed' }, { status: 403 })
+        }
+
+        const { data, error } = await supabase.from('account').update({ refresh_token: session?.provider_refresh_token, access_token: session?.provider_token }).eq('email', profile.data.emailAddress).select().single();
+
+        console.log({ data });
+        if (!data?.identity_id) {
+          return NextResponse.json({ error: 'Authentication failed' }, { status: 403 })
+        }
+
+        // schedule cron job to fetch emails
+        await schedules.create({
+          task: getAllGmailEmailsCron.id,
+          cron: "0 */1 * * *", // Run every hour
+          externalId: data?.identity_id,
+          deduplicationKey: `${data?.identity_id}-email-fetch`
+        });
+      } else {
+        return NextResponse.json({ error: 'Authentication failed' }, { status: 403 })
       }
       const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === 'development'

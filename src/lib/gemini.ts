@@ -25,7 +25,6 @@ interface LLMCheck {
 }
 
 export async function classifyEmail(user: User, email: Email, categories: Category[]): Promise<LLMResponse> {
-  console.log("Classifying email", user, email);
   const prompt = `Subject: ${email.subject}
 
 Body:

@@ -32,3 +32,27 @@ export const getInitial = (name: string) => {
   const cleaned = name.replace(/[^a-zA-Z0-9]/g, "");
   return cleaned.length > 0 ? cleaned.charAt(0).toUpperCase() : "";
 }
+
+export const getURL = () => {
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+    'http://localhost:3000/'
+  // Make sure to include `https://` when not localhost.
+  url = url.startsWith('http') ? url : `https://${url}`
+  // Make sure to include a trailing `/`.
+  url = url.endsWith('/') ? url : `${url}/`
+  return url
+}
+
+export const oAuthOptions = () => {
+  const baseUrl = getURL();
+  return {
+    redirectTo: `${baseUrl}auth/callback`,
+    queryParams: {
+      prompt: "consent",
+      access_type: "offline",
+      scope: "openid email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify"
+    }
+  }
+}

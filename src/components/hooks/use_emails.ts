@@ -1,21 +1,33 @@
 import { useEffect, useState } from "react";
 import { createClient } from "~/lib/supabase/client";
 
+interface EmailHookFilters {
+  starred?: boolean,
+  read?: boolean,
+  category?: Category | null,
+  account?: Account | null
+}
 // Custom hook to fetch emails with optional filters
-export function useEmails(filters?: { starred?: boolean; read?: boolean; categoryId?: string | null }) {
+export function useEmails(initialFilters?: EmailHookFilters) {
   const [emails, setEmails] = useState<EmailSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<EmailHookFilters | null>(initialFilters || null);
   const supabase = createClient();
-  const categoryId = filters?.categoryId || null;
 
   useEffect(() => {
     function fetchEmails() {
-      console.log("Fetching emails with category:", categoryId);
+      const categoryId = filters?.category?.id || null;
+      const accountId = filters?.account?.identity_id || null;
+      console.log("Fetching emails with filters:", filters);
       let query = supabase.from("email").select("id,sender,subject,preview,created_at,category_id").order("created_at", { ascending: false });
 
-      if (categoryId) {
+      if (categoryId !== null) {
         query = query.eq("category_id", categoryId);
+      }
+
+      if (accountId !== null && accountId !== "all") {
+        query = query.eq("identity_id", accountId);
       }
 
       query.then(({ data, error }) => {
@@ -45,7 +57,7 @@ export function useEmails(filters?: { starred?: boolean; read?: boolean; categor
     return () => {
       supabase.removeChannel(channel);
     }
-  }, [supabase, setEmails, setIsLoading, categoryId]);
+  }, [supabase, setEmails, setIsLoading, filters]);
 
-  return { emails, isLoading, error };
+  return { emails, setFilters, isLoading, error };
 }

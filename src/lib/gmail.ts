@@ -58,6 +58,33 @@ export async function fetchGmailEmail(
 }
 
 /**
+ * Archives a Gmail message
+ * @param auth Authenticated OAuth2Client
+ * @param messageId ID of the message to delete
+ * @returns Operation result
+ */
+export async function archiveGmailEmail(
+  auth: OAuth2Client,
+  messageId: string
+): Promise<gmail_v1.Schema$Message> {
+  const gmail = google.gmail({ version: 'v1', auth, errorRedactor: false });
+  try {
+    const response = await gmail.users.messages.modify({
+      userId: 'me',
+      id: messageId,
+      requestBody: {
+        removeLabelIds: ['INBOX'],
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(`Error archiving Gmail message ${messageId}:`, error);
+    throw error;
+  }
+}
+
+/**
  * Deletes a Gmail message by moving it to trash
  * @param auth Authenticated OAuth2Client
  * @param messageId ID of the message to delete

@@ -5,6 +5,7 @@ import { Button } from "~/components/ui/button"
 import { useEffect, useState } from "react"
 import { createClient } from "~/lib/supabase/client"
 import { redirect } from 'next/navigation';
+import { oAuthOptions } from "~/lib/utils";
 
 export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,14 +28,7 @@ export default function LoginScreen() {
     try {
       await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            prompt: "consent",
-            access_type: "offline",
-            scope: "openid email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify"
-          }
-        },
+        options: oAuthOptions(),
       });
     } catch (error) {
       console.error('Login error:', error);

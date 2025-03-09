@@ -9,7 +9,7 @@ Check LICENSE file.
 - [x] clear DB schema
 - [x] auth with Google
 - [x] get access to email account
-- [ ] workflow to add additional Gmail accounts
+- [x] workflow to add additional Gmail accounts
 - [x] show list of categories
 - [x] add category with name and description
 - [x] sort incoming emails by the categories using LLM
@@ -17,7 +17,7 @@ Check LICENSE file.
 - [ ] after email is processed, archive it
 - [x] main UI should show list of all processed emails
 - [x] filter by category
-- [ ] filter by inbox
+- [x] filter by inbox
 - [ ] when clicking on an email, open it in Gmail in a separate tab
 - [x] an email can be deleted -> should delete original email
 - [x] user can choose to unsubscribe from an email

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "~/lib/supabase/server";
 import { getEmailTask } from "~/trigger/get_emails";
 import { CategoryFormData } from "~/components/ui/add_category_modal";
-import { isNativeError } from "util/types";
+import { idempotencyKeys } from "@trigger.dev/sdk/v3"
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -135,7 +135,14 @@ export async function POST(request: NextRequest) {
         .select("gmail_id,identity_id");
 
       if (data && data.length > 0) {
-        const payload = data.map(e => ({ payload: { gmailId: e.gmail_id, accountId: e.identity_id } }));
+        const payload = data.map(e => ({
+          payload: {
+            gmailId: e.gmail_id,
+            accountId: e.identity_id,
+            idempotencyKey: idempotencyKeys.create(`${e.gmail_id}-${categoryData.id}`),
+            idempotencyKeyTTL: "60s"
+          }
+        }));
         //batch all reprocessing tasks
         const result = await getEmailTask.batchTrigger(payload);
       }

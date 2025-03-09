@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { DynamicIcon } from 'lucide-react/dynamic';
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
@@ -18,22 +18,15 @@ import ProfileDropdown from "~/components/ui/profile_dropdown";
 
 export default function EmailInbox() {
   // Use the custom hook to fetch emails
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
   const categories = useCategories();
   const [accounts, activeAccount, setActiveAccount] = useAccounts();
-  const { emails, isLoading, error } = useEmails({ categoryId: selectedCategory });
+  const { emails, setFilters, isLoading, error } = useEmails({ category: activeCategory, account: activeAccount });
 
   useEffect(() => {
-    if (selectedCategory) {
-      const category = categories.find(cat => cat.id === selectedCategory);
-      setActiveCategory(category || null);
-    } else {
-      setActiveCategory(null);
-    }
-  }, [selectedCategory, categories]);
-
+    setFilters({ category: activeCategory, account: activeAccount });
+  }, [activeCategory, activeAccount]);
 
   // Function to trigger email fetching task
   const fetchEmails = async () => {
@@ -57,7 +50,7 @@ export default function EmailInbox() {
   // Trigger email fetching on component mount
   useEffect(() => {
     fetchEmails();
-  }, []);
+  }, [accounts]);
 
   const toggleEmailSelection = (id: string) => {
     setSelectedEmails(prev =>
@@ -77,9 +70,9 @@ export default function EmailInbox() {
             <ProfileDropdown profiles={accounts || []} currentProfile={activeAccount} setActiveAccount={setActiveAccount} />
             <div className="space-y-1 h-full">
               <Button
-                variant={selectedCategory === "all" ? "outline" : "ghost"}
+                variant={activeCategory === null ? "outline" : "ghost"}
                 className="w-full justify-start cursor-pointer"
-                onClick={() => setSelectedCategory(null)}
+                onClick={() => setActiveCategory(null)}
               >
                 <Inbox className="mr-2 h-4 w-4" />
                 All Mail
@@ -87,9 +80,9 @@ export default function EmailInbox() {
               {categories.map(category => (
                 <Button
                   key={category.id}
-                  variant={selectedCategory === category.id ? "outline" : "ghost"}
+                  variant={activeCategory?.id === category.id ? "outline" : "ghost"}
                   className="w-full cursor-pointer flex justify-between"
-                  onClick={() => setSelectedCategory(category.id)}
+                  onClick={() => setActiveCategory(category)}
                 >
                   <DynamicIcon name={(category.icon || "email") as any} className={`mr-2 h-4 w-4 stroke-slate-800`} />
                   <div className="w-full flex"><span className='max-w-32 truncate'>{category.name}</span></div>
@@ -100,14 +93,14 @@ export default function EmailInbox() {
                   </Badge>}
                 </Button>
               ))}
-              <Button
-                variant={selectedCategory === "none" ? "secondary" : "ghost"}
+              {false && <Button
+                variant={false ? "secondary" : "ghost"}
                 className="w-full justify-start cursor-pointer"
-                onClick={() => setSelectedCategory("none")}
+                onClick={() => setActiveCategory(null)}
               >
                 <Inbox className="mr-2 h-4 w-4" />
                 <span className='max-w-32 truncate'>Uncategorized</span>
-              </Button>
+              </Button>}
               <div className="mt-4 w-full px-2 text-left">
                 <AddCategoryModal />
               </div>
