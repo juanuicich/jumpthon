@@ -6,10 +6,9 @@ import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Inbox, Dog } from "lucide-react"
-import { CategorySwitcher } from "~/components/ui/category_switcher";
 import { EmailItem } from '~/components/ui/email_item';
 import { Icon } from "~/components/ui/icon";
-import { AddCategoryModal, CategoryFormData } from "~/components/ui/add_category_modal";
+import { AddCategoryModal } from "~/components/ui/add_category_modal";
 import { RemoveCategoryModal } from "~/components/ui/remove_category_modal";
 import { useEmails } from '~/components/hooks/use_emails';
 import { useCategories } from '~/components/hooks/use_categories';
@@ -20,7 +19,6 @@ export default function EmailInbox() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([])
-  const [openCategorySwitcher, setOpenCategorySwitcher] = useState(false)
   const categories = useCategories();
   const { emails, isLoading, error } = useEmails({ categoryId: selectedCategory });
 
@@ -123,15 +121,6 @@ export default function EmailInbox() {
                 <Inbox className="mr-2 h-4 w-4" />
                 <span className='max-w-32 truncate'>Uncategorized</span>
               </Button>
-              <CategorySwitcher
-                onSelect={(category) => {
-                  setSelectedCategory(category.id)
-                  console.log("Selected category:", category)
-                }}
-                open={openCategorySwitcher}
-                categories={categories}
-                modalTitle="Select category"
-              />
               <div className="mt-4 w-full px-2 text-left">
                 <AddCategoryModal />
               </div>
