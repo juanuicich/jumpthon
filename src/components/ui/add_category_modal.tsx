@@ -18,6 +18,7 @@ import { Label } from "~/components/ui/label"
 import { Textarea } from "~/components/ui/textarea"
 import { IconSelector } from "~/components/ui/icon_selector"
 import { ideahub } from "googleapis/build/src/apis/ideahub"
+import { DynamicIcon } from "lucide-react/dynamic"
 
 interface CategoryModalProps {
   onSubmit?: (data: CategoryFormData) => void,
@@ -77,7 +78,10 @@ export function AddCategoryModal({ onSubmit, edit, category }: CategoryModalProp
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">{edit ? "Edit" : "Add New"}  Category</Button>
+        <Button variant="outline" className="cursor-pointer">
+          {edit ? <DynamicIcon name="edit-2" className="h-4 w-4" /> : <DynamicIcon name="plus" className="h-4 w-4" />}
+          {edit ? "Edit" : "Add New"}  Category
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>

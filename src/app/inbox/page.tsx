@@ -6,12 +6,12 @@ import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Inbox, Dog } from "lucide-react"
-import { RemoveCategoryDialog } from "~/components/ui/remove-category-dialog";
 import { CategorySwitcher } from "~/components/ui/category_switcher";
 import { EmailItem } from '~/components/ui/email_item';
 import { KeyboardShortcutsModal } from '~/components/ui/keyboard_shortcuts_modal';
 import { Icon } from "~/components/ui/icon";
 import { AddCategoryModal, CategoryFormData } from "~/components/ui/add_category_modal";
+import { RemoveCategoryModal } from "~/components/ui/remove_category_modal";
 import { useEmails } from '~/components/hooks/use_emails';
 import { useCategories } from '~/components/hooks/use_categories';
 import { useKeyboardShortcuts } from '~/components/hooks/use_keyboard_shortcuts';
@@ -80,22 +80,6 @@ export default function EmailInbox() {
     }
   }
 
-  async function deleteCategory(category: Category, shouldRecategorize: boolean) {
-    // Post the category data to the API /api/add-category
-    try {
-      const response = await fetch(`/api/category?id=${category.id}&recat=${shouldRecategorize}`, {
-        method: 'DELETE',
-      });
-      console.log("Response:", response);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add category');
-      }
-    } catch (error) {
-      console.error('Error creating category:', error);
-    }
-  }
-
   const handleAddCategory = (data: CategoryFormData) => {
     console.log("Category data:", data)
     upsertCategory(data);
@@ -123,20 +107,6 @@ export default function EmailInbox() {
     console.log(`Updating emails with action: ${action}`, { updatedEmails });
     setSelectedEmails([])
   }
-  const [categoryToRemove, setCategoryToRemove] = useState<Category | null>(null);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
-  const handleRemoveCategory = (category: Category) => {
-    if (category) {
-      setCategoryToRemove(category);
-      setIsConfirmOpen(true);
-    }
-  };
-
-  const handleConfirmRemove = (category: Category, shouldRecategorize: boolean) => {
-    console.log(`Removing category`, { category, shouldRecategorize });
-    deleteCategory(category, shouldRecategorize);
-  };
 
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
@@ -164,14 +134,6 @@ export default function EmailInbox() {
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">
-      {categoryToRemove && (
-        <RemoveCategoryDialog
-          category={categoryToRemove}
-          onConfirm={handleConfirmRemove}
-          open={isConfirmOpen}
-          onOpenChange={setIsConfirmOpen}
-        />
-      )}
       <div className="flex flex-1 overflow-hidden w-full max-w-7xl mx-auto">
         <aside className="w-56 p-3 hidden md:block h-screen flex-none">
           <div className="h-full w-full flex justify-between flex-col">
@@ -265,10 +227,7 @@ export default function EmailInbox() {
                   <Icon name={activeCategory?.icon} className="h-6 w-6 mr-2" />
                   <div className="text-lg mr-4">{activeCategory?.name}</div>
                   <AddCategoryModal onSubmit={handleAddCategory} edit={true} category={activeCategory} />
-                  <Button variant="outline" onClick={() => handleRemoveCategory(activeCategory)} className="cursor-pointer">
-                    <DynamicIcon name="trash-2" className="h-4 w-4" />
-                    Delete Category
-                  </Button>
+                  <RemoveCategoryModal category={activeCategory} />
                 </div>
               }
 
