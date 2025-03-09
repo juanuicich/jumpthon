@@ -97,6 +97,7 @@ export const unsubDeleteEmailTask = task({
           captcha_config: { active: true },
           proxy_config: { active: true },
           recording: { active: true },
+          headless: false,
           timeout: 2
         };
 

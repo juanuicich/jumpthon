@@ -27,5 +27,5 @@ Check LICENSE file.
 
 -----
 
-- [ ] add better state management
+- [x] add better state management
 - [ ] improve delete/unsub UX
