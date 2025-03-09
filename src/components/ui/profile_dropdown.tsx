@@ -18,6 +18,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { useEffect } from "react";
 import { oAuthOptions } from "~/lib/utils";
+import { useAccountStore } from "~/components/stores/account_store";
 
 interface ProfileDropdownProps {
   currentProfile: Account | null
@@ -26,24 +27,20 @@ interface ProfileDropdownProps {
   className?: string,
 }
 
-export default function ProfileDropdown({ currentProfile, profiles = [], setActiveAccount, className }: ProfileDropdownProps) {
-  const allAccountsProfile: Account = {
-    identity_id: "all",
-    name: "All accounts",
-    email: null,
-    picture_url: null,
-  }
+export default function ProfileDropdown() {
+  // const { currentProfile, profiles, setActiveAccount, className } = useAccountStore();
+  const { accounts: profiles, activeAccount, setActiveAccount } = useAccountStore();
 
   // Use provided props or defaults
-  const profilesData = profiles.length > 1 ? [allAccountsProfile, ...profiles] : profiles
-  const currentProfileData = currentProfile || profilesData[0]
+  // const profilesData = profiles
+  const currentProfileData = activeAccount
 
-  useEffect(() => {
-    // If accounts change and the current account is not in the list, set the first account as active
-    if (!profilesData.find((profile) => profile.identity_id === currentProfileData?.identity_id)) {
-      setActiveAccount(profilesData[0])
-    }
-  }, [profilesData])
+  // useEffect(() => {
+  //   // If accounts change and the current account is not in the list, set the first account as active
+  //   if (!profilesData.find((profile) => profile.identity_id === currentProfileData?.identity_id)) {
+  //     setActiveAccount(profilesData[0])
+  //   }
+  // }, [profilesData])
 
   // Handle profile deletion (just a placeholder)
   const handleSelectProfile = (profile: Account, e: React.MouseEvent) => {
@@ -117,7 +114,7 @@ export default function ProfileDropdown({ currentProfile, profiles = [], setActi
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          {profilesData.map((profile) => (
+          {profiles.map((profile) => (
             <DropdownMenuItem key={profile.identity_id} className="py-2 cursor-pointer" onClick={(e) => handleSelectProfile(profile, e)}>
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center">

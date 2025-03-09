@@ -1,6 +1,7 @@
 "use client"
 
-import { use, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import debounce from "lodash.debounce";
 import { DynamicIcon } from 'lucide-react/dynamic';
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
@@ -10,53 +11,38 @@ import { EmailItem } from '~/components/ui/email_item';
 import { Icon } from "~/components/ui/icon";
 import { AddCategoryModal } from "~/components/ui/add_category_modal";
 import { RemoveCategoryModal } from "~/components/ui/remove_category_modal";
-import { useAccounts } from '~/components/hooks/use_accounts';
-import { useCategories } from '~/components/hooks/use_categories';
-import { useEmails } from '~/components/hooks/use_emails';
 import { DeleteEmail } from "~/components/ui/delete_email";
 import ProfileDropdown from "~/components/ui/profile_dropdown";
+import { initializeStores } from "~/components/stores/initialize";
+import { useEmailStore } from "~/components/stores/email_store";
+import { useCategoryStore } from "~/components/stores/category_store";
+import { useAccountStore } from "~/components/stores/account_store";
 
 export default function EmailInbox() {
-  // Use the custom hook to fetch emails
-  const [activeCategory, setActiveCategory] = useState<Category | null>(null);
-  const [selectedEmails, setSelectedEmails] = useState<string[]>([])
-  const categories = useCategories();
-  const [accounts, activeAccount, setActiveAccount] = useAccounts();
-  const { emails, setFilters, isLoading, error } = useEmails({ category: activeCategory, account: activeAccount });
+  // Get state and actions from stores
+  const { emails, selectedEmails, toggleEmailSelection, setFilters } = useEmailStore();
+  const { categories, activeCategory, setActiveCategory } = useCategoryStore();
+  // const { accounts, activeAccount, setActiveAccount } = useAccountStore();
 
+  // Debounce filter updates
+  const debouncedSetFilters = useCallback(
+    debounce((filters) => {
+      setFilters(filters);
+    }, 300), // 300ms delay
+    [setFilters]
+  );
+
+  // Initialize stores and subscriptions
   useEffect(() => {
-    setFilters({ category: activeCategory, account: activeAccount });
-  }, [activeCategory, activeAccount]);
+    const cleanup = initializeStores();
+    return cleanup;
+  }, []);
 
-  // Function to trigger email fetching task
-  const fetchEmails = async () => {
-    try {
-      const response = await fetch('/api/fetch-emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch emails');
-      }
-    } catch (error) {
-      console.error('Error triggering email fetch:', error);
-    }
-  };
-
-  // Trigger email fetching on component mount
-  useEffect(() => {
-    fetchEmails();
-  }, [accounts]);
-
-  const toggleEmailSelection = (id: string) => {
-    setSelectedEmails(prev =>
-      prev.includes(id) ? prev.filter(emailId => emailId !== id) : [...prev, id]
-    )
-  }
+  // // Update filters when category or account changes
+  // useEffect(() => {
+  //   console.log("Updating filters", { activeCategory, activeAccount });
+  //   debouncedSetFilters({ category: activeCategory, account: activeAccount });
+  // }, [activeCategory, activeAccount, debouncedSetFilters]);
 
   return (
     <div className="flex flex-col h-full max-h-screen bg-background">
@@ -67,7 +53,7 @@ export default function EmailInbox() {
               <Dog className="h-5 w-5 stroke-amber-600" />
               <h1 className="text-lg font-bold">Chompymail</h1>
             </div>
-            <ProfileDropdown profiles={accounts || []} currentProfile={activeAccount} setActiveAccount={setActiveAccount} />
+            <ProfileDropdown />
             <div className="space-y-1 h-full">
               <Button
                 variant={activeCategory === null ? "outline" : "ghost"}
@@ -86,11 +72,6 @@ export default function EmailInbox() {
                 >
                   <DynamicIcon name={(category.icon || "email") as any} className={`mr-2 h-4 w-4 stroke-slate-800`} />
                   <div className="w-full flex"><span className='max-w-32 truncate'>{category.name}</span></div>
-                  {false && <Badge
-                    className="w-8 h-6 cursor-pointer group-hover:hidden"
-                    variant="secondary"
-                  >
-                  </Badge>}
                 </Button>
               ))}
               {false && <Button
@@ -115,9 +96,9 @@ export default function EmailInbox() {
                 checked={selectedEmails.length === emails.length && selectedEmails.length > 0}
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    setSelectedEmails(emails.map(email => email.id));
+                    // setSelectedEmails(emails.map(email => email.id));
                   } else {
-                    setSelectedEmails([]);
+                    // setSelectedEmails([]);
                   }
                 }}
                 className="h-9 w-9 mr-2 rounded-full cursor-pointer"
@@ -150,8 +131,7 @@ export default function EmailInbox() {
               <EmailItem
                 key={email.id}
                 email={email}
-                categories={categories}
-                accounts={accounts}
+                // accounts={accounts}
                 isSelected={selectedEmails.includes(email.id)}
                 onSelect={toggleEmailSelection}
               />

@@ -24,3 +24,8 @@ Check LICENSE file.
   - [x] use AI agent to follow unsubscribe link and make sure it unsubbed
 - [x] actions can be triggered on multiple emails at once
 - [x] setup cron job to fetch incoming emails
+
+-----
+
+- [ ] add better state management
+- [ ] improve delete/unsub UX
