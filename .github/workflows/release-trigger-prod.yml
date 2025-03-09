@@ -17,11 +17,13 @@ jobs:
         with:
           node-version: "23.x"
 
-      - name: Install dependencies
-        run: npm install
+      - uses: pnpm/action-setup@v4
+
+      # - name: Install dependencies
+      #   run: npm install
 
       - name: 🚀 Deploy Trigger.dev
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
         run: |
-          npm run deploy:trigger
+          pnpm run deploy:trigger
