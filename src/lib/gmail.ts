@@ -93,19 +93,23 @@ export async function archiveGmailEmail(
 export async function deleteGmailEmail(
   auth: OAuth2Client,
   messageId: string
-): Promise<gmail_v1.Schema$Message> {
+): Promise<boolean> {
   const gmail = google.gmail({ version: 'v1', auth, errorRedactor: false });
 
   try {
-    const response = await gmail.users.messages.trash({
+    await gmail.users.messages.trash({
       userId: 'me',
       id: messageId,
     });
 
-    return response.data;
+    return true;
   } catch (error) {
+    //@ts-ignore
+    if (error?.status && error?.status === 404) {
+      return true;
+    }
     console.error(`Error deleting Gmail message ${messageId}:`, error);
-    throw error;
+    return false;
   }
 }
 

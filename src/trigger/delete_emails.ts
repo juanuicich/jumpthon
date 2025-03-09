@@ -38,7 +38,7 @@ export const deleteEmailTask = task({
         deleteEmails([payload.id]);
         return deleted;
       } else {
-        throw new Error("Failed to delete", deleted);
+        throw new Error("Failed to delete");
       }
     } catch (error) {
       logger.error("Error getting Gmail emails", { error });
@@ -98,7 +98,7 @@ export const unsubDeleteEmailTask = task({
           proxy_config: { active: true },
           recording: { active: true },
           headless: false,
-          timeout: 2
+          timeout: 1
         };
 
         const { id: browserSessionId } = await createBrowserSession(browserConfiguration);
@@ -108,26 +108,26 @@ export const unsubDeleteEmailTask = task({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            url: payload.unsub_link, task: `"You must unsubscribe me from this email I received. Fill any forms necessary to make sure I am completely unsubscribed from ALL emails from this sender. Check to select the right options if necessary. DO NOT UNDER ANY CIRCUMSTANCES subscribe me to anything. DO NOT resusbcribe me to anything. If the page says I am already unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
+            url: payload.unsub_link, task: `"You must unsubscribe me from this email I received. Fill any forms necessary to make sure I am completely unsubscribed from ALL emails from this sender. Check to select the right options if necessary. DO NOT UNDER ANY CIRCUMSTANCES subscribe me to anything. DO NOT resusbcribe me to anything. DO NOT search for other pages, you have been given the correct link. If the page says I am already unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed. If the page returns an error, inform the user and stop.
 
-      Read the page carefully. First try to unsubscribe by clicking the form. Do not enter any email addresses. It should be prefilled already.
+            Read the page carefully. First try to unsubscribe by clicking the form. Do not enter any email addresses. It should be prefilled already.
 
-      Have you read the page and tried clicking unsubscribe?
+            Have you read the page and tried clicking unsubscribe?
 
-      If that didn't work and the form requires you to enter my email address and it isn't prefilled in the form already, you can use the address: ${payload.to}
+            If that didn't work and the form requires you to enter my email address and it isn't prefilled in the form already, you can use the address: ${payload.to}
 
-      Once you confirm I am unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
+            Once you confirm I am unsubscribed, you can stop. Confirm this by reading the text and making sure it says I am now unsubscribed.
 
-      If successful, respond with just OK. If there was an error, respond with a JSON object with a key error and the message."`})
-        };
+            If as a final result I am unsubscribed, respond with just OK. If there was an error, respond with a JSON object with a key error and the message."`})
+        }
 
-        const result = await fetch(`https://connect.anchorbrowser.io/tools/perform-web-task?apiKey=${process.env.ANCHOR_BROWSER_KEY}`, options);
+        const result = await fetch(`https://connect.anchorbrowser.io/tools/perform-web-task?apiKey=${process.env.ANCHOR_BROWSER_KEY}&sessionId=${browserSessionId}`, options);
+        const json = await result.json();
+        logger.info("Unsub response", { json });
 
         await stopBrowserSession(browserSessionId);
 
-        logger.info("Unsub response", { result });
-
-        const check = await checkUnsub(JSON.stringify(result));
+        const check = await checkUnsub(JSON.stringify(json));
 
         logger.info("Unsub check", { check });
 
