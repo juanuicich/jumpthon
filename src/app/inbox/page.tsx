@@ -20,7 +20,7 @@ import { EmailList } from "~/components/ui/email_list";
 
 export default function EmailInbox() {
   // Get state and actions from stores
-  const { emails, selectedEmails, toggleEmailSelection, setFilters } = useEmailStore();
+  const { emails, selectedEmails, setFilters, isLoading: emailsLoading } = useEmailStore();
   const { categories, activeCategory, setActiveCategory } = useCategoryStore();
   const { activeAccount } = useAccountStore();
 
@@ -50,7 +50,10 @@ export default function EmailInbox() {
         <aside className="w-56 p-3 hidden md:block h-screen flex-none">
           <div className="h-full w-full flex justify-between flex-col">
             <div className="flex items-center gap-2 mb-4 px-2">
-              <Dog className="h-5 w-5 stroke-amber-600" />
+              <div className="group">
+                <Dog className={`h-5 w-5 stroke-amber-600 ${emailsLoading ? "hidden" : "block"}`} />
+                <DynamicIcon name="loader" className={`animate-spin h-5 w-5 ${!emailsLoading ? "hidden" : "block"}`} />
+              </div>
               <h1 className="text-lg font-bold">Chompymail</h1>
             </div>
             <ProfileDropdown />
