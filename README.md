@@ -27,5 +27,12 @@ Check LICENSE file.
 
 -----
 
-- [ ] add better state management
+- [x] add better state management
 - [ ] improve delete/unsub UX
+
+  1. API route tests for /api/category, /api/email, and /api/fetch-emails
+  2. Authentication flow tests for your auth middleware and protected routes
+  3. Tests for account_store.ts to complete store coverage
+  4. Gmail/email integration tests for the core email functionality
+  5. Modal component tests for user interactions (add/remove category)
+  6. Database operation tests with mocked Supabase client
