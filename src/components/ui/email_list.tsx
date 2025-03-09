@@ -14,8 +14,8 @@ export function EmailList() {
   };
 
   // Get container width and height for responsive list dimensions
-  const [listWidth, setListWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 800);
-  const [listHeight, setListHeight] = useState(typeof window !== 'undefined' ? window.innerHeight : 600);
+  const [listWidth, setListWidth] = useState(800);
+  const [listHeight, setListHeight] = useState(600);
 
   useEffect(() => {
     const handleResize = () => {
