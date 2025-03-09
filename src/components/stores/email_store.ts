@@ -18,6 +18,7 @@ interface EmailState {
   setFilters: (filters: Partial<EmailState['filters']>) => void;
   fetchEmails: () => Promise<void>;
   fetchEmailsDirect: () => Promise<void>;
+  removeEmail: (id: string) => void;
   toggleEmailSelection: (id: string) => void;
   selectAllEmails: () => void;
   clearSelectedEmails: () => void;
@@ -86,6 +87,10 @@ export const useEmailStore = create<EmailState>((set, get) => ({
       debouncedFetch();
     });
   },
+
+  removeEmail: async (id) => set((state) => ({
+    emails: state.emails.filter(email => email.id !== id)
+  })),
 
   toggleEmailSelection: (id) => set((state) => ({
     selectedEmails: state.selectedEmails.includes(id)

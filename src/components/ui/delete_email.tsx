@@ -8,7 +8,7 @@ interface DeleteEmailProps {
 }
 
 export function DeleteEmail({ unsub = false }: DeleteEmailProps) {
-  const { selectedEmails: emails, clearSelectedEmails } = useEmailStore();
+  const { selectedEmails: emails, clearSelectedEmails, removeEmail } = useEmailStore();
   const [disabled, setDisabled] = useState(false);
 
   async function deleteEmails() {
@@ -19,7 +19,7 @@ export function DeleteEmail({ unsub = false }: DeleteEmailProps) {
     try {
       setDisabled(true);
       clearSelectedEmails();
-      console.log("Deleting emails:", emails);
+
       const response = await fetch(`/api/email`, {
         method: 'DELETE',
         body: JSON.stringify({ emailIds: emails, unsub }),
@@ -27,7 +27,8 @@ export function DeleteEmail({ unsub = false }: DeleteEmailProps) {
           'Content-Type': 'application/json',
         },
       });
-      console.log("Response:", response);
+      emails.forEach((emailId) => removeEmail(emailId));
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete emails');
