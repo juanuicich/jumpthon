@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-core';
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { deleteGmailEmail, getGmailClient } from "~/lib/gmail";
 import { checkUnsub } from "~/lib/gemini";
