@@ -58,6 +58,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.12",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "@trigger.dev/build": "^3.3.17",
     "@types/eslint": "^9.6.1",
     "@types/lodash.debounce": "^4.0.9",
@@ -66,16 +68,20 @@
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
     "eslint": "^9.22.0",
     "eslint-config-next": "^15.2.1",
+    "happy-dom": "^17.4.3",
+    "jsdom": "^26.0.0",
     "knip": "^5.45.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.0.12",
     "trigger.dev": "3.3.17",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
   },
   "ct3aMetadata": {
     "initVersion": "7.38.1"
