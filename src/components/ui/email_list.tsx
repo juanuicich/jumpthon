@@ -1,3 +1,4 @@
+'use client';
 import { useEmailStore } from '~/components/stores/email_store';
 import { EmailItem } from '~/components/ui/email_item';
 import { FixedSizeList as List } from 'react-window';
@@ -13,26 +14,20 @@ export function EmailList() {
   };
 
   // Get container width and height for responsive list dimensions
-  const [listWidth, setListWidth] = useState(() =>
-    listRef.current?.clientWidth || 0
-  );
-
-  const [listHeight, setListHeight] = useState(() => {
-    if (typeof window !== "undefined") {
-      return Math.min(emails.length * ITEM_HEIGHT, window.innerHeight);
-    }
-    return 0;
-  });
-
+  const [listWidth, setListWidth] = useState(window?.innerWidth || 800);
+  const [listHeight, setListHeight] = useState(window?.innerHeight || 600);
 
   useEffect(() => {
     const handleResize = () => {
       if (listRef.current) {
         setListWidth(listRef.current.clientWidth);
+        setListHeight(window.innerHeight - listRef.current.getBoundingClientRect().top);
       }
     };
 
+    // Initial size calculation after component mounts
     handleResize();
+
     if (typeof window !== "undefined") {
       window?.addEventListener('resize', handleResize);
     }
@@ -58,9 +53,9 @@ export function EmailList() {
   };
 
   return (
-    <div className="w-full" ref={listRef}>
+    <div className="w-full h-[calc(100vh-200px)]" ref={listRef}>
       <List
-        height={listHeight}
+        height={listHeight || 500}
         width={listWidth || '100%'}
         itemCount={emails.length}
         itemSize={ITEM_HEIGHT}
