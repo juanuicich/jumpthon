@@ -78,6 +78,7 @@ export const useEmailStore = create<EmailState>((set, get) => ({
   },
 
   fetchEmails: async () => {
+    get().clearSelectedEmails();
     return new Promise<void>((resolve) => {
       const debouncedFetch = debounce(() => {
         get().fetchEmailsDirect().then(resolve);

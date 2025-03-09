@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { DynamicIcon } from "lucide-react/dynamic";
 import { Button } from "~/components/ui/button"
+import { useEmailStore } from "../stores/email_store";
 
 interface DeleteEmailProps {
-  emails: EmailSummary[];
   unsub?: boolean;
 }
 
-export function DeleteEmail({ emails, unsub = false }: DeleteEmailProps) {
+export function DeleteEmail({ unsub = false }: DeleteEmailProps) {
+  const { selectedEmails: emails, clearSelectedEmails } = useEmailStore();
   const [disabled, setDisabled] = useState(false);
 
   async function deleteEmails() {
@@ -17,6 +18,7 @@ export function DeleteEmail({ emails, unsub = false }: DeleteEmailProps) {
     // Post the category data to the API /api/add-category
     try {
       setDisabled(true);
+      clearSelectedEmails();
       console.log("Deleting emails:", emails);
       const response = await fetch(`/api/email`, {
         method: 'DELETE',
@@ -39,7 +41,7 @@ export function DeleteEmail({ emails, unsub = false }: DeleteEmailProps) {
 
   if (unsub) {
     return (
-      <Button variant="outline" disabled={emails.length == 0} size="sm"
+      <Button variant="outline" disabled={emails.length == 0 || disabled} size="sm"
         onClick={deleteEmails} className="cursor-pointer"
         title="Use AI agent to unsubscribe">
         <DynamicIcon name="bot" className="h-4 w-4 mr-2" />
@@ -48,7 +50,7 @@ export function DeleteEmail({ emails, unsub = false }: DeleteEmailProps) {
     )
   } else {
     return (
-      <Button variant="outline" disabled={emails.length == 0} size="sm"
+      <Button variant="outline" disabled={emails.length == 0 || disabled} size="sm"
         onClick={deleteEmails} className="cursor-pointer">
         <DynamicIcon name="trash-2" className="h-4 w-4 mr-2" />
         Delete

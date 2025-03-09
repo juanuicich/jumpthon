@@ -97,8 +97,8 @@ export default function EmailInbox() {
               />
 
               <div className={selectedEmails.length > 0 ? "block" : "hidden"}>
-                <DeleteEmail emails={selectedEmails} />
-                <DeleteEmail emails={selectedEmails} unsub={true} />
+                <DeleteEmail />
+                <DeleteEmail unsub={true} />
               </div>
               <div className={`${selectedEmails.length == 0 && activeCategory ? "flex" : "hidden"} items-center gap-2`}>
                 <Icon name={activeCategory?.icon || "dog"} className="h-6 w-6 ml-1" />
