@@ -60,12 +60,11 @@ export default function ProfileDropdown() {
       console.error("No identities found");
       return;
     }
-    console.log({ identities, account });
+
     const selectedIdentity = identities.find((identity) => identity.identity_id === account.identity_id);
     if (selectedIdentity) {
       // unlink the  identity from the user
       const { data, error } = await supabase.auth.unlinkIdentity(selectedIdentity);
-      console.log({ data, error });
     }
   }
 
