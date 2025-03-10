@@ -38,8 +38,17 @@ export async function DELETE(request: NextRequest) {
     let result
     if (unsub) {
       result = await unsubDeleteEmailTask.batchTrigger(emailList);
+      await supabase
+        .from('email')
+        .update({ deleted_at: new Date() })
+        .in('id', emailIds);
     } else {
       result = await deleteEmailTask.batchTrigger(emailList);
+      //delete all emails immediately
+      await supabase
+        .from('email')
+        .delete()
+        .in('id', emailIds);
     }
 
     return NextResponse.json({
