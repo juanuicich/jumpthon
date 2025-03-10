@@ -10,6 +10,7 @@ import { oAuthOptions } from "~/lib/utils";
 export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
+  const authOptions = oAuthOptions();
 
   // Redirect to inbox if user is already logged in
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function LoginScreen() {
     try {
       await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: oAuthOptions(),
+        options: authOptions,
       });
     } catch (error) {
       console.error('Login error:', error);

@@ -7,11 +7,15 @@ import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const req = request
+  const { searchParams } = new URL(req.url)
+  const origin = new URL(req.url).origin
+
   const code = searchParams.get('code')
   // if "next" is in param, use it as the redirect URL
   const next = searchParams.get('next') ?? '/'
 
+  console.log({ code, next });
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
