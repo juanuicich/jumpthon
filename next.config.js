@@ -6,15 +6,15 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  redirects: async () => {
-    return [
-      {
-        source: "/",
-        destination: "/inbox",
-        permanent: true,
-      },
-    ];
-  },
+  // redirects: async () => {
+  //   return [
+  //     {
+  //       source: "/",
+  //       destination: "/inbox",
+  //       permanent: true,
+  //     },
+  //   ];
+  // },
 };
 
 export default config;
