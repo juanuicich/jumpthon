@@ -10,6 +10,7 @@ import Link from "next/link";
 
 export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSelected: boolean; onSelect: (id: string) => void }) {
   const { accounts } = useAccountStore();
+  const niceDate = new Date(email.created_at).toLocaleString();
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent event from bubbling up
@@ -74,7 +75,7 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
               )}
             </div>
             <div className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-              {email.created_at}
+              {niceDate}
             </div>
           </div>
 
