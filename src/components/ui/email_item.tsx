@@ -47,7 +47,7 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5">
-            <div className="font-semibold text-base truncate max-w-[250px] sm:max-w-xs flex items-center mr-2">
+            <div className="font-semibold text-base truncate flex items-center mr-2">
               <span>{email.sender}</span>
               {email.bot_log?.unsub_log && (
                 <RobotDialog className="ml-2">
