@@ -18,10 +18,12 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { oAuthOptions } from "~/lib/utils";
 import { useAccountStore } from "~/components/stores/account_store";
+import { useRouter } from 'next/navigation';
 
 
 export default function ProfileDropdown() {
   const { accounts, activeAccount, setActiveAccount } = useAccountStore();
+  const router = useRouter();
 
   const handleSelectProfile = (profile: Account, e: React.MouseEvent) => {
     setActiveAccount(profile);
@@ -30,7 +32,11 @@ export default function ProfileDropdown() {
 
   const handleDeleteProfile = (profile: Account, e: React.MouseEvent) => {
     e.stopPropagation()
-    unlinkIdentity(profile);
+    if (accounts.length > 1) {
+      unlinkIdentity(profile);
+    } else {
+      signOut();
+    }
   }
 
   const handleConnectProfile = (e: React.MouseEvent) => {
@@ -66,6 +72,15 @@ export default function ProfileDropdown() {
       // unlink the  identity from the user
       const { data, error } = await supabase.auth.unlinkIdentity(selectedIdentity);
     }
+  }
+
+  async function signOut() {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Sign out error", error);
+    }
+    router.push('/');
   }
 
   return (
