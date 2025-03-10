@@ -5,6 +5,8 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { getInitial } from "~/lib/utils";
 import { RobotDialog } from "./robot_dialog";
 import { VideoModal } from "./video_modal";
+import { Button } from "./button";
+import Link from "next/link";
 
 export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSelected: boolean; onSelect: (id: string) => void }) {
   const { accounts } = useAccountStore();
@@ -62,6 +64,11 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
                         </li>
                       ))}
                     </ul>
+                    {email.unsub_link &&
+                      <Button asChild>
+                        <Link href={email.unsub_link} rel="noopener,noreferrer" target="_blank">Unsubscribe manually</Link>
+                      </Button>
+                    }
                   </div>
                 </RobotDialog>
               )}
