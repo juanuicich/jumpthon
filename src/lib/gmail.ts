@@ -13,7 +13,7 @@ import { getAccountById } from '~/server/db/queries';
  */
 export async function fetchGmailInbox(
   auth: OAuth2Client,
-  maxResults: number = 100
+  maxResults: number = 500
 ): Promise<gmail_v1.Schema$Message[]> {
   const gmail = google.gmail({ version: 'v1', auth, errorRedactor: false });
 
