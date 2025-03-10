@@ -52,6 +52,7 @@ export const useEmailStore = create<EmailState>((set, get) => ({
       let query = supabase
         .from("email")
         .select("id,sender,subject,preview,created_at,category_id,identity_id,gmail_id")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(1000);
 
