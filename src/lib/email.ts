@@ -38,7 +38,7 @@ export async function fetchAndProcessEmail(accountId: string, gmailId: string) {
   const categoryId = categories.find(category => category.name == summarized.category)?.id || null;
   const sender = parseEmailSender(email.payload?.headers?.find(header => header.name === "From")?.value || "");
 
-  const dbEmail: Omit<Email, "updated_at" | "id"> = {
+  const dbEmail: Omit<Email, "updated_at" | "id" | "bot_log"> = {
     subject: summarized.subject,
     preview: summarized.summary,
     starred: false,
