@@ -32,7 +32,7 @@ export function RobotDialog({
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className={cn("gap-1 cursor-pointer p-1", className)}
+          className={cn("gap-1 cursor-pointer border-0 focus:border-0 p-1", className)}
           aria-label="Open robot speech"
           onClick={(e) => {
             e.stopPropagation();

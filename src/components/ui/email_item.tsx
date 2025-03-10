@@ -4,8 +4,7 @@ import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { getInitial } from "~/lib/utils";
 import { RobotDialog } from "./robot_dialog";
-import { Play } from "lucide-react";
-import Link from "next/link";
+import { VideoModal } from "./video_modal";
 
 export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSelected: boolean; onSelect: (id: string) => void }) {
   const { accounts } = useAccountStore();
@@ -50,20 +49,19 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
               {email.bot_log?.unsub_log && (
                 <RobotDialog className="ml-2">
                   <div className="text-sm">
-                    I tried to unsubcribe but I found the following errors:
-                    {email.bot_log.unsub_log.map((log: any, index: number) => (
-                      <div key={`botlog-${index}`} className="py-1">
-                        <p>{log.result || ""}</p>
-                        {log.videos && <p>
-                          {log.videos.map((video: any, index: number) => (
-                            <Link key={`video-${index}`} href={video} target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:underline">
-                              <Play className="h-4 w-4 inline-block mr-1" />
-                              Video
-                            </Link>
-                          ))}
-                        </p>}
-                      </div>
-                    ))}
+                    I tried to unsubcribe but I found some issues.
+                    <ul>
+                      {email.bot_log.unsub_log.map((log: any, index: number) => (
+                        <li key={`botlog-${index}`} className="py-1">
+                          <p>{log.result || ""}</p>
+                          {log.videos && <p>
+                            {log.videos.map((video: any, index: number) => (
+                              <VideoModal key={`video-${index}`} videoSrc={video} buttonText="Video" />
+                            ))}
+                          </p>}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </RobotDialog>
               )}
