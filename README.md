@@ -28,4 +28,4 @@ Check LICENSE file.
 -----
 
 - [x] add better state management
-- [ ] improve delete/unsub UX
+- [x] improve delete/unsub UX
