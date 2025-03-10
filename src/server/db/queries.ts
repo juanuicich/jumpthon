@@ -92,3 +92,51 @@ export async function deleteEmails(emailIds: string[]) {
 
   return data;
 }
+
+export async function resetDeletedEmails() {
+  const supabase = getClient();
+  // Calculate timestamp for 10 minutes ago in UTC
+  const tenMinutesAgo = new Date();
+  tenMinutesAgo.setMinutes(tenMinutesAgo.getMinutes() - 10);
+
+  const { data, error } = await supabase
+    .from('email')
+    .update({ deleted_at: null })
+    .lt('deleted_at', tenMinutesAgo.toISOString());
+
+  return { data, error };
+}
+
+export async function resetDeletedEmail(id: string) {
+  const supabase = getClient();
+
+  const { data, error } = await supabase
+    .from('email')
+    .update({ deleted_at: null })
+    .eq('id', id);;
+
+  return { data, error };
+}
+
+export async function getEmailBotLog(id: string) {
+  const supabase = getClient();
+
+  const { data, error } = await supabase
+    .from('email')
+    .select('bot_log')
+    .eq('id', id)
+    .limit(1)
+    .single();
+
+  return { data, error };
+}
+
+export async function updateEmailBotLog(id: string, bot_log: any) {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from('email')
+    .update({ bot_log: bot_log })
+    .eq('id', id);
+
+  return { data, error };
+}

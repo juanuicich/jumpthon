@@ -37,18 +37,20 @@ export async function DELETE(request: NextRequest) {
 
     let result
     if (unsub) {
-      result = await unsubDeleteEmailTask.batchTrigger(emailList);
-      await supabase
+      const { data, error } = await supabase
         .from('email')
         .update({ deleted_at: new Date() })
         .in('id', emailIds);
+      console.log("Unsub emails", { data, error });
+      result = await unsubDeleteEmailTask.batchTrigger(emailList);
     } else {
-      result = await deleteEmailTask.batchTrigger(emailList);
       //delete all emails immediately
-      await supabase
+      const { data, error } = await supabase
         .from('email')
         .delete()
         .in('id', emailIds);
+      console.log("Deleted emails", { data, error });
+      result = await deleteEmailTask.batchTrigger(emailList);
     }
 
     return NextResponse.json({

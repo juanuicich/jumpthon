@@ -1,7 +1,8 @@
-import { logger, task } from "@trigger.dev/sdk/v3";
+import { logger, schedules, task } from "@trigger.dev/sdk/v3";
 import { deleteGmailEmail, getGmailClient } from "~/lib/gmail";
 import { checkUnsub } from "~/lib/gemini";
-import { deleteEmails } from "~/server/db/queries";
+import { deleteEmails, getEmailBotLog, resetDeletedEmail, resetDeletedEmails, updateEmailBotLog } from "~/server/db/queries";
+import { log } from "console";
 
 export interface EmailTaskInput {
   id: string,
@@ -77,6 +78,17 @@ async function stopBrowserSession(sessionId: string) {
   });
 }
 
+async function getSessionRecordings(sessionId: string) {
+  const response = await fetch(`https://api.anchorbrowser.io/api/sessions/${sessionId}/recording`, {
+    method: "GET",
+    headers: {
+      "anchor-api-key": `${process.env.ANCHOR_BROWSER_KEY}`,
+    },
+  });
+  return await response.json();
+}
+
+
 // This task only unsubscribes the user from the email, then queues the deleteEmailTask
 export const unsubDeleteEmailTask = task({
   id: "unsub-email",
@@ -86,6 +98,9 @@ export const unsubDeleteEmailTask = task({
   },
   retry: {
     maxAttempts: 2,
+  },
+  onFailure: async (payload: EmailTaskInput, error, { ctx }) => {
+    await resetDeletedEmail(payload.id);
   },
   run: async (payload: EmailTaskInput, { ctx }) => {
     try {
@@ -133,17 +148,56 @@ export const unsubDeleteEmailTask = task({
 
         if (check.status === "error") {
           logger.error("Failed to unsubscribe", { check });
+
+          const recordings = await getSessionRecordings(browserSessionId);
+          logger.info("Session recordings", { recordings });
+          const { data, error } = await getEmailBotLog(payload.id);
+          logger.info("Bot log", { data });
+          if (data) {
+            json.videos = recordings?.data?.videos || [];
+            const unsub_log = data.bot_log?.unsub_log || [];
+            const new_log = {
+              ...data.bot_log || {},
+              unsub_log: [...unsub_log, json]
+            };
+            // Update the bot log with the new unsub_log
+            logger.info("Updating bot log", { new_log });
+            await updateEmailBotLog(payload.id, new_log);
+          }
+
           throw new Error("Failed to unsubscribe");
         }
-        const deleted = await deleteEmailTask.trigger(payload);
+        await deleteEmailTask.trigger(payload);
+
         return { browserSessionId, result, check };
+
       } else {
 
-        const deleted = await deleteEmailTask.trigger(payload);
+        await deleteEmailTask.trigger(payload);
       }
 
     } catch (error) {
       logger.error("Error unsubscribing from email", { error }); throw error;
     }
+  },
+});
+
+// Recurring task to reset deleted_at field for emails after 10 minutes
+export const resetDeletedEmailsTask = schedules.task({
+  id: "reset-deleted-emails",
+  cron: "*/5 * * * *", // Run every 5 minutes
+  description: "Reset deleted_at field for emails that have been in deleted state for more than 10 minutes",
+  maxDuration: 60,
+  retry: {
+    maxAttempts: 1
+  },
+  run: async (payload, { ctx }) => {
+    const { data, error } = await resetDeletedEmails();
+
+    if (error) {
+      logger.error("Error resetting deleted emails", { error });
+      throw error;
+    }
+    return { data };
   }
 });
