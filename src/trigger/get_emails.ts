@@ -30,6 +30,7 @@ export const getAllGmailEmailsTask = task({
   retry: {
     maxAttempts: 1
   },
+  machine: "medium-1x",
   run: async (payload: { accountId: string }, { ctx }) => {
     logger.log("Getting emails for account", { accountId: payload.accountId });
 
@@ -59,7 +60,7 @@ export const getAllGmailEmailsCron = schedules.task({
   retry: {
     maxAttempts: 1
   },
-  cron: "0 */1 * * *", // Run every hour
+  // cron: "0 */1 * * *", // Run every hour
   run: async (payload: { type: "DECLARATIVE" | "IMPERATIVE"; timestamp: Date; timezone: string; scheduleId: string; upcoming: Date[]; lastTimestamp?: Date; externalId?: string }, { ctx }) => {
 
     const accountId = payload.externalId;
