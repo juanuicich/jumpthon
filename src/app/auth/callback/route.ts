@@ -15,7 +15,6 @@ export async function GET(request: Request) {
   // if "next" is in param, use it as the redirect URL
   const next = searchParams.get('next') ?? '/'
 
-  console.log({ code, next });
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
@@ -46,7 +45,6 @@ export async function GET(request: Request) {
           return NextResponse.json({ error: 'Authentication failed' }, { status: 403 })
         }
 
-        console.log({ session, profile: profile.data });
         const { data, error } = await supabase.from('account').update({ refresh_token: session?.provider_refresh_token, access_token: session?.provider_token }).eq('email', profile.data.emailAddress).select().single();
 
         if (!data?.identity_id) {

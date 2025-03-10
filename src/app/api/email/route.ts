@@ -41,7 +41,6 @@ export async function DELETE(request: NextRequest) {
         .from('email')
         .update({ deleted_at: new Date() })
         .in('id', emailIds);
-      console.log("Unsub emails", { data, error });
       result = await unsubDeleteEmailTask.batchTrigger(emailList);
     } else {
       //delete all emails immediately
@@ -49,7 +48,6 @@ export async function DELETE(request: NextRequest) {
         .from('email')
         .delete()
         .in('id', emailIds);
-      console.log("Deleted emails", { data, error });
       result = await deleteEmailTask.batchTrigger(emailList);
     }
 
