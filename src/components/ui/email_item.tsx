@@ -79,7 +79,7 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
             </div>
           </div>
 
-          <div className="text-sm truncate overflow-hidden">
+          <div className="text-sm">
             <span className="font-semibold">{email.subject}</span>
             {" "}
             <span className="text-muted-foreground">{email.preview}</span>
