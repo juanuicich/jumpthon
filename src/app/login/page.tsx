@@ -11,6 +11,7 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
   const authOptions = oAuthOptions();
+  console.log(authOptions);
 
   // Redirect to inbox if user is already logged in
   useEffect(() => {
