@@ -19,6 +19,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run -c vitest.config.e2e.ts",
+    "test:e2e:watch": "vitest -c vitest.config.e2e.ts",
+    "test:app": "vitest run src/test/e2e/app.test.tsx",
     "typecheck": "tsc --noEmit",
     "knip": "knip"
   },
