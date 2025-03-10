@@ -1,13 +1,6 @@
 import { create } from 'zustand';
 import { createClient } from "~/lib/supabase/client";
 
-interface Account {
-  identity_id: string;
-  name: string;
-  email: string | null;
-  picture_url: string | null;
-}
-
 interface AccountState {
   accounts: Account[];
   activeAccount: Account | null;
