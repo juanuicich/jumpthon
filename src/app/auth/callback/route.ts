@@ -40,7 +40,7 @@ export async function GET(request: Request) {
         const gmail = google.gmail({ version: 'v1', auth, errorRedactor: false });
         const profile = await gmail.users.getProfile({ userId: 'me' });
 
-        return NextResponse.json({ session, profile: profile.data }, { status: 200 });
+        // return NextResponse.json({ session, profile: profile.data }, { status: 200 });
 
         if (!profile.data.emailAddress) {
           return NextResponse.json({ error: 'Authentication failed' }, { status: 403 })
