@@ -25,14 +25,9 @@ export function RemoveCategoryModal({ category }: RemoveCategoryModalProps) {
     }
     // Post the category data to the API /api/add-category
     try {
-      const response = await fetch(`/api/category?id=${category.id}`, {
+      await fetch(`/api/category?id=${category.id}`, {
         method: 'DELETE',
       });
-      console.log("Response:", response);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete category');
-      }
     } catch (error) {
       console.error('Error deleting category:', error);
     }
