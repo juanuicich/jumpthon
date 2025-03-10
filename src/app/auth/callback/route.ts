@@ -39,7 +39,8 @@ export async function GET(request: Request) {
           return NextResponse.json({ error: 'Authentication failed' }, { status: 403 })
         }
 
-        const { data, error } = await supabase.from('account').update({ refresh_token: session?.provider_refresh_token, access_token: session?.provider_token }).eq('email', profile.data.emailAddress).select().single();
+        console.log({ session, profile: profile.data });
+        const { data, error } = await supabase.from('account').update({ refresh_token: session?.provider_refresh_token, access_token: session?.provider_token }).eq('email', profile.data.emailAddress);
 
         if (!data?.identity_id) {
           return NextResponse.json({ error: 'Authentication failed' }, { status: 403 })
