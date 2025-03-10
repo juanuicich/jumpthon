@@ -3,6 +3,9 @@ import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { getInitial } from "~/lib/utils";
+import { RobotDialog } from "./robot_dialog";
+import { Play } from "lucide-react";
+import Link from "next/link";
 
 export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSelected: boolean; onSelect: (id: string) => void }) {
   const { accounts } = useAccountStore();
@@ -19,12 +22,11 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
     if (typeof window !== "undefined") {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
-    console.log("Opening email:", email.id)
   }
 
   return (
     <Card
-      className={`p-3 rounded-none hover:bg-accent/50 transition-colors cursor-pointer h-24 ${isSelected ? 'bg-primary/10' : ''}`
+      className={`p-3 rounded-none overflow-hidden hover:bg-accent/50 transition-colors cursor-pointer h-24 ${isSelected ? 'bg-primary/10' : ''}`
       }
     >
       <div className="flex items-start gap-3" onClick={(e) => handleOpenClick(e)}>
@@ -43,22 +45,42 @@ export function EmailItem({ email, isSelected, onSelect }: { email: Email; isSel
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5">
-            <div className="font-semibold text-base truncate max-w-[180px] sm:max-w-xs flex items-center mr-2">
-              {email.sender}
+            <div className="font-semibold text-base truncate max-w-[250px] sm:max-w-xs flex items-center mr-2">
+              <span>{email.sender}</span>
+              {email.bot_log?.unsub_log && (
+                <RobotDialog className="ml-2">
+                  <div className="text-sm">
+                    I tried to unsubcribe but I found the following errors:
+                    {email.bot_log.unsub_log.map((log: any, index: number) => (
+                      <div key={`botlog-${index}`} className="py-1">
+                        <p>{log.result || ""}</p>
+                        {log.videos && <p>
+                          {log.videos.map((video: any, index: number) => (
+                            <Link key={`video-${index}`} href={video} target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:underline">
+                              <Play className="h-4 w-4 inline-block mr-1" />
+                              Video
+                            </Link>
+                          ))}
+                        </p>}
+                      </div>
+                    ))}
+                  </div>
+                </RobotDialog>
+              )}
             </div>
             <div className="text-xs text-muted-foreground whitespace-nowrap ml-2">
               {email.created_at}
             </div>
           </div>
 
-          <div className="text-sm">
+          <div className="text-sm truncate overflow-hidden">
             <span className="font-semibold">{email.subject}</span>
             {" "}
             <span className="text-muted-foreground">{email.preview}</span>
           </div>
         </div>
       </div>
-    </Card>
+    </Card >
   )
 }
 

@@ -93,6 +93,7 @@ export type Database = {
           unsub_link: string | null
           updated_at: string | null
           user_id: string | null
+          bot_log: any
         }
         Insert: {
           category_id?: string | null
