@@ -10,7 +10,7 @@ interface CategoryState {
   setActiveCategory: (category: Category | null) => void;
 }
 
-export const useCategoryStore = create<CategoryState>((set) => ({
+export const useCategoryStore = create<CategoryState>((set, get) => ({
   categories: [],
   activeCategory: null,
 
@@ -26,7 +26,12 @@ export const useCategoryStore = create<CategoryState>((set) => ({
       if (error) {
         console.error("Error fetching categories:", error);
       } else {
+
+        const activeCategory = get().activeCategory;
         set({ categories: data });
+        if (activeCategory && !data.includes(activeCategory)) {
+          get().setActiveCategory(null);
+        }
       }
     } catch (error) {
       console.error("Unexpected error:", error);
